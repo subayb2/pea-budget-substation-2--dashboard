@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบวิเคราะห์ข้อมูลคุมงบทำการ ผจฟ.2 (ปีงบประมาณ 2569)</title>
+  
+  <!-- Google Fonts: Sarabun & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- FontAwesome for Premium Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Sarabun', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            pea: {
+              50: '#fdf2ff',
+              100: '#f9e5ff',
+              500: '#9c27b0', // PEA Purple
+              600: '#8e24aa',
+              700: '#7b1fa2',
+              800: '#6a1b9a',
+            },
+            success: '#10b981',
+            warning: '#f59e0b',
+            danger: '#ef4444',
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* Custom Scrollbar and UI Smoothness */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0,0,0,0.05);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(156, 39, 176, 0.3);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(156, 39, 176, 0.6);
+    }
+    .skeleton {
+      background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
+</head>
+<body class="bg-[#f8f9fa] text-slate-800 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300 font-sans min-h-screen flex flex-col">
+
+  <!-- Top Banner / Navbar -->
+  <header class="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 transition-colors duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <!-- Logo and Title -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-pea-500 rounded-xl flex items-center justify-center text-white shadow-md shadow-pea-500/20">
+            <i class="fa-solid fa-layer-group text-lg"></i>
+          </div>
+          <div>
+            <h1 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">
+              คุมงบทำการ ผจฟ.2 <span class="text-pea-500">PEA</span>
+            </h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+              พอร์ทัลวิเคราะห์สถานะงบประมาณปี 2569 คาดการณ์สด
+            </p>
+          </div>
+        </div>
+
+        <!-- Right Controls (Sync Status & Actions) -->
+        <div class="flex items-center space-x-3">
+          <!-- Live Status Badge -->
+          <div id="liveSyncBadge" class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all">
+            <span class="relative flex h-2 w-2">
+              <span id="syncIndicatorPing" class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"></span>
+              <span id="syncIndicatorDot" class="relative inline-flex rounded-full h-2 w-2"></span>
+            </span>
+            <span id="syncStatusText">กำลังเชื่อมต่อข้อมูลชีต...</span>
+          </div>
+
+          <!-- Manual Sync Online Button -->
+          <button id="manualSyncBtn" class="px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center space-x-1.5 transition-all shadow-sm">
+            <i id="syncBtnIcon" class="fa-solid fa-arrows-rotate"></i>
+            <span>ซิงค์ข้อมูลล่าสุด</span>
+          </button>
+
+          <!-- Configuration Button -->
+          <button id="openConfigBtn" class="px-3 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg flex items-center space-x-1 transition-all">
+            <i class="fa-solid fa-cog"></i>
+            <span class="hidden sm:inline">ตั้งค่าลิงก์ชีต</span>
+          </button>
+          
+          <!-- Theme Toggle -->
+          <button id="themeToggle" class="w-9 h-9 flex items-center justify-center bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-slate-600 dark:text-slate-300">
+            <i class="fa-solid fa-moon dark:hidden"></i>
+            <i class="fa-solid fa-sun hidden dark:block"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Status Bar -->
+  <div id="mobileStatusBar" class="md:hidden text-center text-[11px] py-1.5 px-4 font-medium transition-colors border-b">
+    <i class="fa-solid fa-circle-nodes mr-1"></i> <span id="mobileStatusText">กำลังดึงข้อมูล...</span>
+  </div>
+
+  <!-- Main Content Layout -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- Spreadsheet Config Collapsible Panel -->
+    <div id="configPanel" class="hidden mb-6 bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all duration-300">
+      <div class="flex justify-between items-center mb-3">
+        <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center">
+          <i class="fa-solid fa-link text-pea-500 mr-2"></i>
+          การตั้งค่าเชื่อมโยงข้อมูล Google Sheet
+        </h3>
+        <button id="closeConfigBtn" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+        ข้อมูลแดชบอร์ดด้านล่างจะดึงจาก Google Sheet ของท่านอัตโนมัติ หากต้องการเปลี่ยนไปดึงข้อมูลจากชีตอื่นหรือบัญชีอื่น 
+        ให้ทำการ<strong>แชร์สเปรดชีตนั้นเป็นสาธารณะ (ทุกคนที่มีลิงก์มีสิทธิ์อ่าน)</strong> จากนั้นคัดลอกลิงก์หรือ Spreadsheet ID มาระบุที่ช่องด้านล่างนี้
+      </p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+        <div class="md:col-span-3">
+          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Google Sheet URL หรือ Spreadsheet ID</label>
+          <input id="sheetUrlInput" type="text" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pea-500 focus:outline-none" placeholder="วางลิงก์ Google Sheet หรือใส่เฉพาะ ID ของชีตได้ทันที...">
+        </div>
+        <div class="md:col-span-1 flex space-x-2">
+          <button id="saveConfigBtn" class="flex-1 py-2 bg-pea-500 hover:bg-pea-600 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 h-[34px]">
+            <i class="fa-solid fa-sync"></i>
+            <span>บันทึกและเชื่อมข้อมูล</span>
+          </button>
+          <button id="resetToDefaultSheetBtn" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 h-[34px]" title="รีเซ็ตเป็นลิงก์เริ่มต้น">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI Summary Section -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      
+      <!-- Card 1: Total Budget -->
+      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-4 transition-all hover:shadow-md">
+        <div class="p-3 bg-pea-50 dark:bg-pea-950/30 text-pea-500 dark:text-pea-400 rounded-xl">
+          <i class="fa-solid fa-wallet text-2xl"></i>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">งบประมาณปี 2569</p>
+          <h3 id="kpiTotalBudget" class="text-2xl font-bold text-slate-900 dark:text-white mt-1">฿0.00</h3>
+          <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 flex items-center">
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1"></span> อัปเดตล่าสุดจากชีตต้นทาง
+          </p>
+        </div>
+      </div>
+
+      <!-- Card 2: Total Spent -->
+      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-4 transition-all hover:shadow-md">
+        <div class="p-3 bg-amber-50 dark:bg-amber-950/30 text-amber-500 dark:text-amber-400 rounded-xl">
+          <i class="fa-solid fa-receipt text-2xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">ใช้งบไปแล้ว (Actual Spent)</p>
+          <h3 id="kpiTotalSpent" class="text-2xl font-bold text-slate-900 dark:text-white mt-1">฿0.00</h3>
+          <div class="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full mt-2">
+            <div id="kpiSpentPercentBar" class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex justify-between">
+            <span>เบิกจ่ายคิดเป็น</span>
+            <span id="kpiSpentPercent" class="font-bold text-amber-500">0.00%</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Card 3: Total Remaining -->
+      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-4 transition-all hover:shadow-md">
+        <div class="p-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 dark:text-emerald-400 rounded-xl">
+          <i class="fa-solid fa-circle-dollar-to-slot text-2xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">งบประมาณคงเหลือ</p>
+          <h3 id="kpiTotalRemaining" class="text-2xl font-bold text-slate-900 dark:text-white mt-1">฿0.00</h3>
+          <div class="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full mt-2">
+            <div id="kpiRemainingPercentBar" class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex justify-between">
+            <span>คงเหลือคิดเป็น</span>
+            <span id="kpiRemainingPercent" class="font-bold text-emerald-500">0.00%</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Card 4: Account Warnings -->
+      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-4 transition-all hover:shadow-md">
+        <div id="alertIndicatorIcon" class="p-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 dark:text-emerald-400 rounded-xl">
+          <i class="fa-solid fa-shield-check text-2xl"></i>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">สถานะควบคุมงบ</p>
+          <h3 id="kpiAlertCount" class="text-xl font-bold text-slate-900 dark:text-white mt-1">ปกติสุข</h3>
+          <p id="kpiAlertDesc" class="text-xs text-slate-500 dark:text-slate-400 mt-1">ไม่มีรหัสบัญชีที่วิกฤต</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Analytics Charts Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      
+      <!-- Chart Column 1: Overall Doughnut (Utilization) -->
+      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-1 flex flex-col justify-between">
+        <div class="mb-4">
+          <h4 class="text-sm font-bold text-slate-900 dark:text-white">ภาพรวมความก้าวหน้าการเบิกจ่าย</h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400">สัดส่วนยอดที่ใช้ไปแล้วเปรียบเทียบกับงบที่ยังเหลือ</p>
+        </div>
+        <div class="relative flex items-center justify-center h-52">
+          <canvas id="utilizationChart"></canvas>
+        </div>
+        <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 grid grid-cols-2 gap-2 text-center text-xs">
+          <div>
+            <span class="inline-block w-2.5 h-2.5 bg-[#9c27b0] rounded-full mr-1.5"></span>
+            <span class="text-slate-500 dark:text-slate-400 font-medium">เบิกจ่ายแล้ว</span>
+          </div>
+          <div>
+            <span class="inline-block w-2.5 h-2.5 bg-[#10b981] rounded-full mr-1.5"></span>
+            <span class="text-slate-500 dark:text-slate-400 font-medium">งบประมาณคงเหลือ</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Column 2: Budget Comparison (Categories) -->
+      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-1 flex flex-col justify-between">
+        <div class="mb-4">
+          <h4 class="text-sm font-bold text-slate-900 dark:text-white">สัดส่วนค่าใช้จ่ายแบ่งตามกลุ่มบัญชีหลัก</h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400">เปรียบเทียบสัดส่วนการใช้จ่ายแยกตามโครงสร้างบัญชีหลัก</p>
+        </div>
+        <div class="relative flex items-center justify-center h-52">
+          <canvas id="categoryChart"></canvas>
+        </div>
+        <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 flex flex-wrap gap-y-1 gap-x-3 justify-center text-[10px] text-slate-500 dark:text-slate-400">
+          <div class="flex items-center"><span class="w-2 h-2 bg-purple-500 rounded-full mr-1"></span>บุคลากร & เดินทาง</div>
+          <div class="flex items-center"><span class="w-2 h-2 bg-blue-500 rounded-full mr-1"></span>วัสดุ & สาธารณูปโภค</div>
+          <div class="flex items-center"><span class="w-2 h-2 bg-amber-500 rounded-full mr-1"></span>เช่า & จ้างบริการ</div>
+          <div class="flex items-center"><span class="w-2 h-2 bg-rose-500 rounded-full mr-1"></span>ซ่อมแซมบำรุงรักษา</div>
+        </div>
+      </div>
+
+      <!-- Chart Column 3: Top Accounts (Bar Chart) -->
+      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-1 flex flex-col justify-between">
+        <div class="mb-4">
+          <h4 class="text-sm font-bold text-slate-900 dark:text-white">5 อันดับรหัสบัญชีที่ใช้งบประมาณสูงสุด</h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400">เปรียบเทียบงบประมาณที่ได้รับจัดสรรกับยอดเบิกจ่ายจริง</p>
+        </div>
+        <div class="relative h-60">
+          <canvas id="topAccountsChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Simulator & Live Alert Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      
+      <!-- Interactive simulated transaction panel -->
+      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-2">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-100 dark:border-slate-700 pb-3">
+          <div class="flex items-center space-x-2">
+            <span class="w-8 h-8 rounded-lg bg-pea-50 dark:bg-pea-950/30 text-pea-500 dark:text-pea-400 flex items-center justify-center">
+              <i class="fa-solid fa-cube text-sm"></i>
+            </span>
+            <div>
+              <h4 class="text-sm font-bold text-slate-900 dark:text-white">กล่องจำลองการเบิกจ่ายงบประมาณ (PEA Budget Simulator)</h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400">ทดลองจ่ายเงินในรหัสบัญชีต่าง ๆ เพื่อดูการอัปเดตบนกราฟและตารางแบบเรียลไทม์</p>
+            </div>
+          </div>
+          <!-- Reset button -->
+          <button id="resetSim" class="text-xs px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-semibold rounded-lg text-slate-600 dark:text-slate-300 transition-colors flex items-center space-x-1">
+            <i class="fa-solid fa-rotate-left text-[10px]"></i>
+            <span>รีเซ็ตค่าเดิม</span>
+          </button>
+        </div>
+
+        <form id="simForm" class="grid grid-cols-1 sm:grid-cols-3 gap-4" onsubmit="event.preventDefault();">
+          
+          <!-- Select Account -->
+          <div class="sm:col-span-1">
+            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">เลือกรหัสบัญชี</label>
+            <select id="simAccountSelect" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pea-500 focus:outline-none">
+              <!-- Options loaded dynamically -->
+            </select>
+          </div>
+
+          <!-- Enter Amount -->
+          <div class="sm:col-span-1">
+            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">จำนวนเงินที่เบิกจ่าย (บาท)</label>
+            <div class="relative">
+              <span class="absolute left-3 top-2 text-slate-400 text-xs font-bold">฿</span>
+              <input id="simAmount" type="number" min="1" step="0.01" placeholder="เช่น 25,000" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl pl-7 pr-3 py-2 text-xs focus:ring-2 focus:ring-pea-500 focus:outline-none font-semibold">
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="sm:col-span-1 flex items-end">
+            <button id="submitSimBtn" type="button" class="w-full py-2 bg-pea-500 hover:bg-pea-600 text-white rounded-xl text-xs font-bold shadow-md shadow-pea-500/10 hover:shadow-lg transition-all flex items-center justify-center space-x-2 h-[34px]">
+              <i class="fa-solid fa-plus-circle"></i>
+              <span>บันทึกและคำนวณกราฟ</span>
+            </button>
+          </div>
+          
+        </form>
+
+        <div id="simLog" class="hidden mt-4 p-3 bg-pea-50/50 dark:bg-pea-950/10 border border-pea-100 dark:border-pea-900/30 rounded-xl text-xs text-pea-800 dark:text-pea-400">
+          <!-- Live action logs will be placed here -->
+        </div>
+      </div>
+
+      <!-- Alerts Panel -->
+      <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-1 flex flex-col justify-between">
+        <div>
+          <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1">รหัสบัญชีที่ต้องเฝ้าระวังสูงสุด</h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">เป้าหมายงบเหลืออยู่น้อยกว่า 30% (ใช้ไปเกิน 70%)</p>
+        </div>
+        
+        <div id="alertsList" class="flex-grow space-y-3 overflow-y-auto max-h-52 pr-1">
+          <!-- Dynamic alert elements will render here -->
+        </div>
+
+        <p class="text-[10px] text-slate-400 mt-3 text-center">อัปเดตสัมพันธ์กับชีตและการจำลองของท่าน</p>
+      </div>
+
+    </div>
+
+    <!-- Advanced Detailed Table -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden mb-6">
+      
+      <!-- Table Header & Controls -->
+      <div class="p-5 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h4 class="text-sm font-bold text-slate-900 dark:text-white">ตารางสรุปคุมบัญชีงบทำการ ผจฟ.2 ทั้งหมด</h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">รวมรายการบัญชีทั้งหมดในชีต พร้อมแถบเปอร์เซ็นต์งบเหลือ</p>
+        </div>
+        
+        <!-- Table Actions -->
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Search input -->
+          <div class="relative w-full sm:w-56">
+            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
+              <i class="fa-solid fa-search text-xs"></i>
+            </span>
+            <input id="tableSearch" type="text" placeholder="พิมพ์รหัส หรือชื่อบัญชี..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl pl-9 pr-3 py-2 text-xs focus:ring-2 focus:ring-pea-500 focus:outline-none">
+          </div>
+
+          <!-- Category filter -->
+          <select id="tableCategoryFilter" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pea-500 focus:outline-none">
+            <option value="All">แสดงทุกหมวดหมู่</option>
+            <option value="Travel & Personnel">หมวดบุคลากร & เดินทาง</option>
+            <option value="Supplies & Utilities">หมวดวัสดุ & สาธารณูปโภค</option>
+            <option value="Services & Rent">หมวดเช่า & จ้างบริการ</option>
+            <option value="Repair & Maintenance">หมวดซ่อมแซมบำรุงรักษา</option>
+          </select>
+
+          <!-- Export Excel Simulation Button -->
+          <button id="exportExcelBtn" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-colors shadow-sm">
+            <i class="fa-solid fa-file-excel"></i>
+            <span>ดาวน์โหลด Excel (CSV)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">
+              <th class="p-4">รหัสบัญชี</th>
+              <th class="p-4">ชื่อรหัสบัญชีทำการ</th>
+              <th class="p-4">หมวดหมู่</th>
+              <th class="p-4 text-right">งบประมาณ (฿)</th>
+              <th class="p-4 text-right">ใช้จริง (฿)</th>
+              <th class="p-4 text-right">คงเหลือ (฿)</th>
+              <th class="p-4 text-center" style="min-width: 150px;">สัดส่วนงบประมาณคงเหลือ</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-slate-100 dark:divide-slate-700/50 text-slate-700 dark:text-slate-300">
+            <!-- Dynamic rows will render here -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table Empty State -->
+      <div id="tableEmptyState" class="hidden p-8 text-center">
+        <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 mx-auto mb-3">
+          <i class="fa-solid fa-search"></i>
+        </div>
+        <h5 class="text-xs font-bold text-slate-800 dark:text-white">ไม่พบข้อมูลงบประมาณคุมบัญชี</h5>
+        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">ลองเปลี่ยนคำค้นหา หรือจัดประเภทหมวดหมู่ใหม่อีกครั้ง</p>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Premium Toast Notification System -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 shadow-xl border border-slate-700/50 dark:border-slate-100 px-4 py-3 rounded-2xl text-xs font-medium max-w-sm flex items-center space-x-2.5 transition-all transform translate-y-20 opacity-0 pointer-events-none">
+    <div id="toastIcon" class="w-6 h-6 rounded-full flex items-center justify-center text-white"></div>
+    <span id="toastMsg" class="flex-1">การจำลองวิเคราะห์ผลสำเร็จ</span>
+  </div>
+
+  <!-- App Footer -->
+  <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-6 mt-auto transition-colors duration-300 text-xs text-slate-500 dark:text-slate-400">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:flex sm:justify-between sm:items-center">
+      <p>
+        <span class="font-bold text-pea-500">ผจฟ.2 District Substation Live Dashboard</span> &copy; 2026 PEA Region 1. Fully Operational.
+      </p>
+      <div class="mt-2 sm:mt-0 flex items-center justify-center space-x-4">
+        <a id="sheetSourceLink" href="https://docs.google.com/spreadsheets/d/1d1M52VNyrn0ETkFWyO4Y-97YfGtOC45RyIyuqVLnTzk/edit?usp=sharing" target="_blank" class="hover:text-pea-500 flex items-center transition-colors">
+          <i class="fa-solid fa-file-invoice-dollar mr-1"></i> เปิดดูไฟล์ Google Sheet ต้นทาง
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // System Theme Mode Logic
+    const themeToggleBtn = document.getElementById('themeToggle');
+    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+
+    themeToggleBtn.addEventListener('click', function() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('color-theme', 'light');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('color-theme', 'dark');
+      }
+      renderCharts(); // Re-render charts to adjust grid lines and border styles
+    });
+
+    // Default target Sheet ID derived from user URL
+    const DEFAULT_SPREADSHEET_ID = "1d1M52VNyrn0ETkFWyO4Y-97YfGtOC45RyIyuqVLnTzk";
+    let currentSpreadsheetId = localStorage.getItem('pea_spreadsheet_id') || DEFAULT_SPREADSHEET_ID;
+
+    // Static baseline backup snapshot of the 19 accounts extracted directly from user's Google Sheet
+    const initialBackupAccounts = [
+      { code: '52022010', name: 'ค่าพาหนะเดินทาง - พนักงาน', category: 'Travel & Personnel', budget: 5000.00, spent: 0.00 },
+      { code: '52022020', name: 'ค่าเบี้ยเลี้ยง - พนักงาน', category: 'Travel & Personnel', budget: 75000.00, spent: 10680.00 },
+      { code: '52022030', name: 'ค่าที่พัก - พนักงาน', category: 'Travel & Personnel', budget: 80000.00, spent: 9750.00 },
+      { code: '53030010', name: 'ค่าวัสดุสำนักงาน', category: 'Supplies & Utilities', budget: 11000.00, spent: 0.00 },
+      { code: '53030030', name: 'ค่าวัสดุเบ็ดเตล็ด', category: 'Supplies & Utilities', budget: 30000.00, spent: 17990.00 },
+      { code: '53031010', name: 'ค่าน้ำดื่มสำนักงาน', category: 'Supplies & Utilities', budget: 3550.00, spent: 0.00 },
+      { code: '53031020', name: 'ค่าน้ำประปาสำนักงาน', category: 'Supplies & Utilities', budget: 365000.00, spent: 62370.69 },
+      { code: '53033010', name: 'ค่าเช่าที่ดินเสารับส่งสัญญาณ', category: 'Services & Rent', budget: 0.00, spent: 0.00 },
+      { code: '53034010', name: 'ค่าจ้างเหมาทำความสะอาดสำนักงาน', category: 'Services & Rent', budget: 0.00, spent: 0.00 },
+      { code: '53034030', name: 'ค่าจ้างบำรุงรักษาสวนบริเวณสถานี', category: 'Services & Rent', budget: 219000.00, spent: 147505.00 },
+      { code: '53034040', name: 'ค่าบำรุงรักษาความสะอาดบริเวณสำนักงาน', category: 'Services & Rent', budget: 350000.00, spent: 109687.00 },
+      { code: '53039010', name: 'ค่าเชื้อเพลิงยานพาหนะของรัฐ', category: 'Supplies & Utilities', budget: 120000.00, spent: 0.00 },
+      { code: '53039990', name: 'ค่าใช้จ่ายเบ็ดเตล็ดทั่วไป', category: 'Supplies & Utilities', budget: 25000.00, spent: 0.00 },
+      { code: '53051030', name: 'ค่าซ่อมแซมระบบไฟฟ้าและระบบแอร์', category: 'Repair & Maintenance', budget: 0.00, spent: 0.00 },
+      { code: '53051040', name: 'ค่าซ่อมฯบำรุงรักษาอาคารสำนักงาน', category: 'Repair & Maintenance', budget: 500000.00, spent: 413300.00 },
+      { code: '53051050', name: 'ค่าซ่อมบำรุงรักษายานพาหนะ', category: 'Repair & Maintenance', budget: 15000.00, spent: 0.00 },
+      { code: '53051060', name: 'ค่าซ่อมบำรุงรักษาคอมพิวเตอร์', category: 'Repair & Maintenance', budget: 10000.00, spent: 0.00 },
+      { code: '53051090', name: 'ค่าวัสดุเบ็ดเตล็ดงานช่าง', category: 'Repair & Maintenance', budget: 30000.00, spent: 7062.00 },
+      { code: '53051100', name: 'ค่าซ่อมแซมและบำรุงรักษาอุปกรณ์สถานีไฟฟ้า', category: 'Repair & Maintenance', budget: 500000.00, spent: 169665.00 }
+    ];
+
+    // State Variables
+    let initialLiveAccounts = []; // Stores baseline downloaded from Google Sheet
+    let peaAccounts = [];         // Stores active manipulated (simulated) account details
+
+    // Category mappings and palettes
+    const categoryMapping = {
+      'Travel & Personnel': { thName: 'เดินทาง & บุคลากร', color: 'rgba(156, 39, 176, 1)', border: '#9c27b0' },
+      'Supplies & Utilities': { thName: 'วัสดุ & สาธารณูปโภค', color: 'rgba(59, 130, 246, 1)', border: '#3b82f6' },
+      'Services & Rent': { thName: 'เช่า & จ้างบริการ', color: 'rgba(245, 158, 11, 1)', border: '#f59e0b' },
+      'Repair & Maintenance': { thName: 'ซ่อมแซมบำรุงรักษา', color: 'rgba(244, 63, 94, 1)', border: '#f43f5e' }
+    };
+
+    // Chart variables
+    let utilizationChartInstance = null;
+    let categoryChartInstance = null;
+    let topAccountsChartInstance = null;
+
+    // Toast Alert system
+    function triggerToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastIcon = document.getElementById('toastIcon');
+      const toastMsg = document.getElementById('toastMsg');
+      
+      toastMsg.innerText = message;
+      
+      if (type === 'success') {
+        toastIcon.className = 'w-6 h-6 rounded-full flex items-center justify-center text-white bg-emerald-500';
+        toastIcon.innerHTML = '<i class="fa-solid fa-check text-xs"></i>';
+      } else if (type === 'warning') {
+        toastIcon.className = 'w-6 h-6 rounded-full flex items-center justify-center text-white bg-amber-500';
+        toastIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-xs"></i>';
+      } else {
+        toastIcon.className = 'w-6 h-6 rounded-full flex items-center justify-center text-white bg-rose-500';
+        toastIcon.innerHTML = '<i class="fa-solid fa-circle-xmark text-xs"></i>';
+      }
+
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      setTimeout(() => {
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 4500);
+    }
+
+    // Helper functions
+    function formatCurrency(val) {
+      return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(val);
+    }
+
+    function calculateFinancials() {
+      let totalBudget = 0;
+      let totalSpent = 0;
+      let totalRemaining = 0;
+
+      peaAccounts.forEach(acc => {
+        totalBudget += acc.budget;
+        totalSpent += acc.spent;
+        totalRemaining += (acc.budget - acc.spent < 0 ? 0 : acc.budget - acc.spent);
+      });
+
+      const spentPercent = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+      const remainingPercent = totalBudget > 0 ? (totalRemaining / totalBudget) * 100 : 0;
+
+      return {
+        totalBudget,
+        totalSpent,
+        totalRemaining,
+        spentPercent,
+        remainingPercent
+      };
+    }
+
+    // Update Connection State Indicators
+    function updateSyncState(state, message) {
+      const liveSyncBadge = document.getElementById('liveSyncBadge');
+      const syncIndicatorPing = document.getElementById('syncIndicatorPing');
+      const syncIndicatorDot = document.getElementById('syncIndicatorDot');
+      const syncStatusText = document.getElementById('syncStatusText');
+      const mobileStatusBar = document.getElementById('mobileStatusBar');
+      const mobileStatusText = document.getElementById('mobileStatusText');
+      const syncBtnIcon = document.getElementById('syncBtnIcon');
+
+      liveSyncBadge.classList.remove('hidden');
+
+      if (state === 'live') {
+        if (syncBtnIcon) syncBtnIcon.classList.remove('fa-spin');
+        // Live success state
+        liveSyncBadge.className = "hidden md:flex items-center space-x-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 rounded-full border border-emerald-200 dark:border-emerald-800 text-xs font-semibold";
+        syncIndicatorPing.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75";
+        syncIndicatorDot.className = "relative inline-flex rounded-full h-2 w-2 bg-emerald-500";
+        
+        mobileStatusBar.className = "md:hidden bg-emerald-50 dark:bg-emerald-950/20 border-b border-emerald-100 dark:border-emerald-900 py-1.5 px-4 text-[11px] text-emerald-800 dark:text-emerald-400 font-medium";
+      } else if (state === 'syncing') {
+        if (syncBtnIcon) syncBtnIcon.classList.add('fa-spin');
+        // Syncing state
+        liveSyncBadge.className = "hidden md:flex items-center space-x-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 rounded-full border border-blue-200 dark:border-blue-800 text-xs font-semibold";
+        syncIndicatorPing.className = "animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75";
+        syncIndicatorDot.className = "relative inline-flex rounded-full h-2 w-2 bg-blue-500";
+        
+        mobileStatusBar.className = "md:hidden bg-blue-50 dark:bg-blue-950/20 border-b border-blue-100 dark:border-blue-900 py-1.5 px-4 text-[11px] text-blue-800 dark:text-blue-400 font-medium";
+      } else {
+        if (syncBtnIcon) syncBtnIcon.classList.remove('fa-spin');
+        // Fallback or Offline state
+        liveSyncBadge.className = "hidden md:flex items-center space-x-2 px-3 py-1.5 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 rounded-full border border-amber-200 dark:border-amber-800 text-xs font-semibold";
+        syncIndicatorPing.className = "absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-0";
+        syncIndicatorDot.className = "relative inline-flex rounded-full h-2 w-2 bg-amber-500";
+        
+        mobileStatusBar.className = "md:hidden bg-amber-50 dark:bg-amber-950/20 border-b border-amber-100 dark:border-amber-900 py-1.5 px-4 text-[11px] text-amber-800 dark:text-amber-400 font-medium";
+      }
+
+      syncStatusText.innerText = message;
+      mobileStatusText.innerText = message;
+    }
+
+    // Dynamic Fetching & Parsing Google Sheet
+    async function fetchGoogleSheetLive(sheetId) {
+      updateSyncState('syncing', 'กำลังดึงข้อมูลจาก Google Sheet...');
+      
+      try {
+        // Use Google Viz query API endpoint to read the spreadsheet as JSON structure
+        const queryUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+        const response = await fetch(queryUrl);
+        
+        if (!response.ok) {
+          throw new Error('ไม่สามารถเข้าถึงที่อยู่เอกสารได้');
+        }
+        
+        const rawText = await response.text();
+        
+        // Google visualization setResponse callback wraps JSON, extract inner object
+        const jsonStart = rawText.indexOf('{');
+        const jsonEnd = rawText.lastIndexOf('}') + 1;
+        if (jsonStart === -1 || jsonEnd === -1) {
+          throw new Error('โครงสร้างข้อมูลในสเปรดชีตผิดรูปแบบ');
+        }
+        
+        const json = JSON.parse(rawText.slice(jsonStart, jsonEnd));
+        const rows = json.table?.rows;
+        
+        if (!rows || rows.length === 0) {
+          throw new Error('ไม่พบข้อมูลแถวในเอกสารสเปรดชีต');
+        }
+
+        const cols = json.table.cols;
+        let codeIdx = -1;
+        let nameIdx = -1;
+        let budgetIdx = -1;
+        let spentIdx = -1;
+
+        // Auto-detect columns dynamically by scan
+        cols.forEach((col, idx) => {
+          const label = (col.label || '').toLowerCase().trim();
+          if (label.includes('รหัส') || label.includes('code') || label.includes('account')) codeIdx = idx;
+          else if (label.includes('ชื่อ') || label.includes('รายการ') || label.includes('name')) nameIdx = idx;
+          else if (label.includes('งบ') || label.includes('budget') || label.includes('รับจัดสรร')) budgetIdx = idx;
+          else if (label.includes('จ่าย') || label.includes('spent') || label.includes('ใช้') || label.includes('จริง')) spentIdx = idx;
+        });
+
+        // Heuristic default if headers are empty or non-standard
+        if (codeIdx === -1 || nameIdx === -1) {
+          codeIdx = 0;   // Col A
+          nameIdx = 1;   // Col B
+          budgetIdx = 2; // Col C
+          spentIdx = 3;  // Col D
+        }
+
+        const parsedLiveAccounts = [];
+
+        rows.forEach(row => {
+          const cells = row.c;
+          if (!cells || cells.length <= Math.max(codeIdx, nameIdx)) return;
+
+          const rawCode = cells[codeIdx] ? String(cells[codeIdx].v || '') : '';
+          
+          // Verify if cell value conforms to 8-digit PEA Account format (e.g. 52022010, 53031020)
+          if (/^\d{8}$/.test(rawCode.trim())) {
+            const rawName = cells[nameIdx] ? String(cells[nameIdx].v || '') : '';
+            
+            let budgetVal = 0;
+            if (cells[budgetIdx]) {
+              budgetVal = typeof cells[budgetIdx].v === 'number' ? cells[budgetIdx].v : parseFloat(String(cells[budgetIdx].v).replace(/[^0-9.-]/g, '')) || 0;
+            }
+
+            let spentVal = 0;
+            if (cells[spentIdx]) {
+              spentVal = typeof cells[spentIdx].v === 'number' ? cells[spentIdx].v : parseFloat(String(cells[spentIdx].v).replace(/[^0-9.-]/g, '')) || 0;
+            }
+
+            // Automatic categorization by code prefix patterns
+            let category = 'Supplies & Utilities';
+            if (rawCode.startsWith('52')) {
+              category = 'Travel & Personnel';
+            } else if (rawCode.startsWith('53033') || rawCode.startsWith('53034')) {
+              category = 'Services & Rent';
+            } else if (rawCode.startsWith('5305')) {
+              category = 'Repair & Maintenance';
+            }
+
+            parsedLiveAccounts.push({
+              code: rawCode.trim(),
+              name: rawName.trim(),
+              category: category,
+              budget: budgetVal,
+              spent: spentVal
+            });
+          }
+        });
+
+        if (parsedLiveAccounts.length > 0) {
+          initialLiveAccounts = JSON.parse(JSON.stringify(parsedLiveAccounts));
+          peaAccounts = JSON.parse(JSON.stringify(parsedLiveAccounts));
+          
+          updateSyncState('live', 'เชื่อมต่อข้อมูลสดเรียบร้อย');
+          triggerToast('เชื่อมโยงและนำเข้าข้อมูลคุมงบล่าสุดเรียบร้อยแล้ว!', 'success');
+          
+          // Render Viewports
+          refreshDashboard();
+        } else {
+          throw new Error('ไม่พบรหัสบัญชีขนาด 8 หลักที่ถูกต้องในตารางชีต');
+        }
+
+      } catch (err) {
+        console.error("Live fetch error, falling back to built-in backup snapshot", err);
+        
+        // Local Fallback state
+        initialLiveAccounts = JSON.parse(JSON.stringify(initialBackupAccounts));
+        peaAccounts = JSON.parse(JSON.stringify(initialBackupAccounts));
+        
+        updateSyncState('fallback', 'โหมดออฟไลน์ (เชื่อมต่อชีตล้มเหลว)');
+        triggerToast('แสดงข้อมูลสำรองในระบบ! กรุณาตรวจสอบการตั้งค่าแชร์ชีตแบบสาธารณะ', 'warning');
+        
+        refreshDashboard();
+      }
+    }
+
+    // Refresh All UI Elements & Components
+    function refreshDashboard() {
+      updateMetrics();
+      renderCharts();
+      renderAlertsList();
+      renderPeaTable();
+      loadSimulatorSelect();
+    }
+
+    // Update Metric Cards and Progress indicators
+    function updateMetrics() {
+      const stats = calculateFinancials();
+
+      document.getElementById('kpiTotalBudget').innerText = formatCurrency(stats.totalBudget);
+      document.getElementById('kpiTotalSpent').innerText = formatCurrency(stats.totalSpent);
+      document.getElementById('kpiTotalRemaining').innerText = formatCurrency(stats.totalRemaining);
+
+      // Spent and progress percentage bar updates
+      document.getElementById('kpiSpentPercentBar').style.width = `${stats.spentPercent}%`;
+      document.getElementById('kpiSpentPercent').innerText = `${stats.spentPercent.toFixed(2)}%`;
+
+      document.getElementById('kpiRemainingPercentBar').style.width = `${stats.remainingPercent}%`;
+      document.getElementById('kpiRemainingPercent').innerText = `${stats.remainingPercent.toFixed(2)}%`;
+
+      // Gauge warning states counting critical accounts
+      let criticalWarningCount = 0;
+      peaAccounts.forEach(acc => {
+        if (acc.budget > 0) {
+          const spentRatio = (acc.spent / acc.budget) * 100;
+          if (spentRatio >= 70) criticalWarningCount++;
+        }
+      });
+
+      const alertIcon = document.getElementById('alertIndicatorIcon');
+      const alertTitle = document.getElementById('kpiAlertCount');
+      const alertDesc = document.getElementById('kpiAlertDesc');
+
+      if (criticalWarningCount > 0) {
+        alertIcon.className = "p-3 bg-rose-50 dark:bg-rose-950/30 text-rose-500 dark:text-rose-400 rounded-xl animate-pulse";
+        alertIcon.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-2xl"></i>`;
+        alertTitle.className = "text-xl font-bold text-rose-500 mt-1";
+        alertTitle.innerText = `${criticalWarningCount} บัญชีตึงตัว`;
+        alertDesc.innerText = "มียอดใช้อัตราสูงกว่า 70%";
+      } else {
+        alertIcon.className = "p-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 dark:text-emerald-400 rounded-xl";
+        alertIcon.innerHTML = `<i class="fa-solid fa-shield-check text-2xl"></i>`;
+        alertTitle.className = "text-xl font-bold text-slate-900 dark:text-white mt-1";
+        alertTitle.innerText = "ปกติสุข";
+        alertDesc.innerText = "ไม่มีรหัสบัญชีน่าเฝ้าระวัง";
+      }
+    }
+
+    // Build or Refresh Chart.js Elements
+    function renderCharts() {
+      const stats = calculateFinancials();
+      const isDark = document.documentElement.classList.contains('dark');
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+      const labelColor = isDark ? '#94a3b8' : '#64748b';
+
+      // --- 1. Utilization Chart ---
+      const utilData = {
+        labels: ['ใช้งบไปแล้ว', 'งบประมาณคงเหลือ'],
+        datasets: [{
+          data: [stats.totalSpent, stats.totalRemaining],
+          backgroundColor: ['#9c27b0', '#10b981'],
+          borderWidth: isDark ? 2 : 1,
+          borderColor: isDark ? '#1e293b' : '#ffffff'
+        }]
+      };
+
+      if (utilizationChartInstance) {
+        utilizationChartInstance.data = utilData;
+        utilizationChartInstance.update();
+      } else {
+        const ctx = document.getElementById('utilizationChart').getContext('2d');
+        utilizationChartInstance = new Chart(ctx, {
+          type: 'doughnut',
+          data: utilData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) {
+                    const value = ctx.raw || 0;
+                    const pct = stats.totalBudget > 0 ? ((value / stats.totalBudget) * 100).toFixed(2) : '0.00';
+                    return ` ${ctx.label}: ${formatCurrency(value)} (${pct}%)`;
+                  }
+                }
+              }
+            },
+            cutout: '72%'
+          }
+        });
+      }
+
+      // --- 2. Category Chart ---
+      const categories = Object.keys(categoryMapping);
+      const categoryBudgets = categories.map(cat => peaAccounts.filter(acc => acc.category === cat).reduce((sum, item) => sum + item.budget, 0));
+      const categorySpents = categories.map(cat => peaAccounts.filter(acc => acc.category === cat).reduce((sum, item) => sum + item.spent, 0));
+
+      const catData = {
+        labels: categories.map(cat => categoryMapping[cat].thName),
+        datasets: [
+          {
+            label: 'งบจัดสรร',
+            data: categoryBudgets,
+            backgroundColor: 'rgba(156, 39, 176, 0.25)',
+            borderColor: '#9c27b0',
+            borderWidth: 1.5,
+            borderRadius: 6
+          },
+          {
+            label: 'ใช้จริง',
+            data: categorySpents,
+            backgroundColor: 'rgba(59, 130, 246, 0.85)',
+            borderColor: '#3b82f6',
+            borderWidth: 1.5,
+            borderRadius: 6
+          }
+        ]
+      };
+
+      if (categoryChartInstance) {
+        categoryChartInstance.data = catData;
+        // Apply dynamic grid colours
+        categoryChartInstance.options.scales.y.grid.color = gridColor;
+        categoryChartInstance.options.scales.y.ticks.color = labelColor;
+        categoryChartInstance.options.scales.x.ticks.color = labelColor;
+        categoryChartInstance.update();
+      } else {
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+        categoryChartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: catData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { color: gridColor },
+                ticks: {
+                  color: labelColor,
+                  font: { family: 'Sarabun', size: 9 },
+                  callback: (v) => v >= 1000 ? (v / 1000) + 'k' : v
+                }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { color: labelColor, font: { family: 'Sarabun', size: 9 } }
+              }
+            }
+          }
+        });
+      }
+
+      // --- 3. Top Accounts Chart ---
+      const top5Accounts = [...peaAccounts].sort((a, b) => b.spent - a.spent).slice(0, 5);
+      const topData = {
+        labels: top5Accounts.map(acc => `${acc.code} ${acc.name.substring(0, 8)}...`),
+        datasets: [
+          {
+            label: 'งบจัดสรร',
+            data: top5Accounts.map(acc => acc.budget),
+            backgroundColor: 'rgba(148, 163, 184, 0.2)',
+            borderColor: 'rgba(148, 163, 184, 0.8)',
+            borderWidth: 1,
+            borderRadius: 4
+          },
+          {
+            label: 'ใช้จริง',
+            data: top5Accounts.map(acc => acc.spent),
+            backgroundColor: 'rgba(156, 39, 176, 0.85)',
+            borderColor: '#9c27b0',
+            borderWidth: 1,
+            borderRadius: 4
+          }
+        ]
+      };
+
+      if (topAccountsChartInstance) {
+        topAccountsChartInstance.data = topData;
+        topAccountsChartInstance.options.scales.x.grid.color = gridColor;
+        topAccountsChartInstance.options.scales.x.ticks.color = labelColor;
+        topAccountsChartInstance.options.scales.y.ticks.color = labelColor;
+        topAccountsChartInstance.update();
+      } else {
+        const ctx = document.getElementById('topAccountsChart').getContext('2d');
+        topAccountsChartInstance = new Chart(ctx, {
+          type: 'bar',
+          data: topData,
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: {
+                beginAtZero: true,
+                grid: { color: gridColor },
+                ticks: {
+                  color: labelColor,
+                  font: { family: 'Sarabun', size: 9 },
+                  callback: (v) => v >= 1000 ? (v / 1000) + 'k' : v
+                }
+              },
+              y: {
+                grid: { display: false },
+                ticks: { color: labelColor, font: { family: 'Sarabun', size: 10 } }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // Populate watch alerts section
+    function renderAlertsList() {
+      const container = document.getElementById('alertsList');
+      container.innerHTML = '';
+      let warningsExist = false;
+
+      peaAccounts.forEach(acc => {
+        if (acc.budget > 0) {
+          const usedPercent = (acc.spent / acc.budget) * 100;
+          const leftPercent = 100 - usedPercent;
+
+          if (usedPercent >= 70) {
+            warningsExist = true;
+            const card = document.createElement('div');
+            let badgeHtml = '';
+
+            if (usedPercent >= 90) {
+              card.className = "p-3 bg-rose-50 dark:bg-rose-950/20 rounded-xl border border-rose-200 dark:border-rose-900/40 flex items-center justify-between text-xs space-x-2";
+              badgeHtml = `<span class="px-2 py-0.5 bg-rose-500 text-white rounded text-[9px] font-bold">วิกฤตความเสี่ยง</span>`;
+            } else {
+              card.className = "p-3 bg-amber-50 dark:bg-amber-950/20 rounded-xl border border-amber-200 dark:border-amber-900/40 flex items-center justify-between text-xs space-x-2";
+              badgeHtml = `<span class="px-2 py-0.5 bg-amber-500 text-white rounded text-[9px] font-bold">เริ่มงบตึงตัว</span>`;
+            }
+
+            card.innerHTML = `
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-900 dark:text-white flex items-center">
+                  <span class="mr-1">${acc.code}</span>
+                  ${badgeHtml}
+                </p>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">${acc.name}</p>
+              </div>
+              <div class="text-right">
+                <p class="font-bold text-slate-800 dark:text-white">เหลือ ${leftPercent.toFixed(1)}%</p>
+                <p class="text-[10px] text-slate-500">ใช้สะสม ${formatCurrency(acc.spent)}</p>
+              </div>
+            `;
+            container.appendChild(card);
+          }
+        }
+      });
+
+      if (!warningsExist) {
+        container.innerHTML = `
+          <div class="p-8 text-center border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">
+            <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-950/40 text-emerald-500 dark:text-emerald-400 flex items-center justify-center mx-auto mb-2">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <h5 class="text-xs font-bold text-slate-900 dark:text-white">ปกติสุขทุกด้าน</h5>
+            <p class="text-[10px] text-slate-500 mt-1">งบประมาณและยอดเบิกจ่ายสัมพันธ์ตามเกณฑ์</p>
+          </div>
+        `;
+      }
+    }
+
+    // Build and populate Simulator select list
+    function loadSimulatorSelect() {
+      const select = document.getElementById('simAccountSelect');
+      select.innerHTML = '';
+
+      peaAccounts.forEach(acc => {
+        const opt = document.createElement('option');
+        opt.value = acc.code;
+        opt.text = `${acc.code} - ${acc.name.substring(0, 18)}... (งบ: ${formatCurrency(acc.budget)})`;
+        select.appendChild(opt);
+      });
+    }
+
+    // Render detailed records into summary table
+    function renderPeaTable() {
+      const query = document.getElementById('tableSearch').value.toLowerCase();
+      const catFilter = document.getElementById('tableCategoryFilter').value;
+      const tableBody = document.getElementById('tableBody');
+      const emptyState = document.getElementById('tableEmptyState');
+
+      tableBody.innerHTML = '';
+      let rowCount = 0;
+
+      peaAccounts.forEach(acc => {
+        const matchesSearch = acc.code.toLowerCase().includes(query) || acc.name.toLowerCase().includes(query);
+        const matchesFilter = catFilter === 'All' || acc.category === catFilter;
+
+        if (matchesSearch && matchesFilter) {
+          rowCount++;
+          const remainingValue = acc.budget - acc.spent;
+          const remainingPct = acc.budget > 0 ? (remainingValue / acc.budget) * 100 : 100;
+          const usedPct = acc.budget > 0 ? (acc.spent / acc.budget) * 100 : 0;
+
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-slate-50/80 dark:hover:bg-slate-700/30 transition-colors group";
+
+          let remainingBarColor = "bg-emerald-500";
+          let pctTextColor = "text-emerald-600 dark:text-emerald-400";
+
+          if (usedPct >= 90) {
+            remainingBarColor = "bg-rose-500";
+            pctTextColor = "text-rose-500 dark:text-rose-400 font-bold";
+          } else if (usedPct >= 70) {
+            remainingBarColor = "bg-amber-500";
+            pctTextColor = "text-amber-500 dark:text-amber-400 font-bold";
+          }
+
+          const thaiCat = categoryMapping[acc.category]?.thName || acc.category;
+
+          tr.innerHTML = `
+            <td class="p-4 font-semibold text-slate-900 dark:text-white group-hover:text-pea-500">${acc.code}</td>
+            <td class="p-4 font-medium text-slate-800 dark:text-slate-200">
+              ${acc.name}
+              ${acc.budget === 0 ? '<span class="ml-1 text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded font-semibold dark:bg-slate-800 dark:text-slate-400">นอกจัดสรร</span>' : ''}
+            </td>
+            <td class="p-4">
+              <span class="px-2 py-0.5 rounded text-[10px] font-medium" style="background-color: ${categoryMapping[acc.category]?.color.replace('1)', '0.1')}; color: ${categoryMapping[acc.category]?.border};">
+                ${thaiCat}
+              </span>
+            </td>
+            <td class="p-4 text-right font-medium">${formatCurrency(acc.budget)}</td>
+            <td class="p-4 text-right font-medium">${formatCurrency(acc.spent)}</td>
+            <td class="p-4 text-right font-semibold">${formatCurrency(remainingValue)}</td>
+            <td class="p-4">
+              <div class="flex items-center space-x-2">
+                <div class="flex-1 bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden min-w-[70px]">
+                  <div class="${remainingBarColor} h-1.5 rounded-full" style="width: ${remainingPct}%"></div>
+                </div>
+                <span class="text-[11px] ${pctTextColor} w-10 text-right">${remainingPct.toFixed(1)}%</span>
+              </div>
+            </td>
+          `;
+
+          tableBody.appendChild(tr);
+        }
+      });
+
+      if (rowCount === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    }
+
+    // Settings configuration modal actions
+    function initConfigActions() {
+      const configPanel = document.getElementById('configPanel');
+      const openConfigBtn = document.getElementById('openConfigBtn');
+      const closeConfigBtn = document.getElementById('closeConfigBtn');
+      const saveConfigBtn = document.getElementById('saveConfigBtn');
+      const sheetUrlInput = document.getElementById('sheetUrlInput');
+      const resetToDefaultSheetBtn = document.getElementById('resetToDefaultSheetBtn');
+      const sheetSourceLink = document.getElementById('sheetSourceLink');
+      const manualSyncBtn = document.getElementById('manualSyncBtn');
+      const syncBtnIcon = document.getElementById('syncBtnIcon');
+
+      // Manual Sync Click Action
+      if (manualSyncBtn) {
+        manualSyncBtn.addEventListener('click', () => {
+          if (syncBtnIcon) syncBtnIcon.classList.add('fa-spin');
+          fetchGoogleSheetLive(currentSpreadsheetId);
+        });
+      }
+
+      // Populate input with current spreadsheet id/url on startup
+      sheetUrlInput.value = currentSpreadsheetId;
+
+      openConfigBtn.addEventListener('click', () => {
+        configPanel.classList.toggle('hidden');
+      });
+
+      closeConfigBtn.addEventListener('click', () => {
+        configPanel.classList.add('hidden');
+      });
+
+      saveConfigBtn.addEventListener('click', () => {
+        let inputVal = sheetUrlInput.value.trim();
+        if (!inputVal) {
+          triggerToast('กรุณาระบุที่อยู่ Google Sheet หรือรหัส ID', 'warning');
+          return;
+        }
+
+        // Parse ID from full shared Google sheet url if pasted
+        if (inputVal.includes('/d/')) {
+          const parts = inputVal.split('/d/');
+          if (parts[1]) {
+            inputVal = parts[1].split('/')[0];
+          }
+        }
+
+        currentSpreadsheetId = inputVal;
+        localStorage.setItem('pea_spreadsheet_id', inputVal);
+        
+        // Update anchor link at bottom
+        sheetSourceLink.href = `https://docs.google.com/spreadsheets/d/${inputVal}/edit?usp=sharing`;
+        
+        // Load live sheet
+        fetchGoogleSheetLive(inputVal);
+        configPanel.classList.add('hidden');
+      });
+
+      resetToDefaultSheetBtn.addEventListener('click', () => {
+        sheetUrlInput.value = DEFAULT_SPREADSHEET_ID;
+        triggerToast('รีเซ็ตลิงก์ค่าเริ่มต้นแล้ว กดบันทึกเพื่อดึงข้อมูล', 'success');
+      });
+    }
+
+    // Simulator forms actions
+    function initSimulatorActions() {
+      const submitBtn = document.getElementById('submitSimBtn');
+      const amountInput = document.getElementById('simAmount');
+      const accountSelect = document.getElementById('simAccountSelect');
+      const simLog = document.getElementById('simLog');
+      const resetSimBtn = document.getElementById('resetSim');
+
+      submitBtn.addEventListener('click', () => {
+        const code = accountSelect.value;
+        const amount = parseFloat(amountInput.value);
+
+        if (isNaN(amount) || amount <= 0) {
+          triggerToast('กรุณากรอกจำนวนเงินเบิกจ่ายที่มากกว่าศูนย์', 'warning');
+          return;
+        }
+
+        const account = peaAccounts.find(acc => acc.code === code);
+        if (!account) return;
+
+        const maxAvailable = account.budget - account.spent;
+        if (account.budget > 0 && amount > maxAvailable) {
+          triggerToast(`ยอดเงินจำลองเกินกว่างบประมาณคงเหลือจริง (${formatCurrency(maxAvailable)})`, 'warning');
+        }
+
+        // Apply simulated spent
+        account.spent = parseFloat((account.spent + amount).toFixed(2));
+
+        simLog.classList.remove('hidden');
+        simLog.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <span class="animate-ping h-2 w-2 rounded-full bg-pea-500"></span>
+            <span><strong>[ระบบจำลอง]</strong> จ่ายรหัสบัญชี <strong>${account.code}</strong> เพิ่มเติม: <strong>+${formatCurrency(amount)}</strong> (จ่ายสะสมแล้ว ${formatCurrency(account.spent)})</span>
+          </div>
+        `;
+
+        refreshDashboard();
+        triggerToast('บันทึกยอดจำลองและคำนวณกราฟเสร็จสิ้น', 'success');
+        amountInput.value = '';
+      });
+
+      // Reset Simulator to initial loaded parameters
+      resetSimBtn.addEventListener('click', () => {
+        peaAccounts = JSON.parse(JSON.stringify(initialLiveAccounts));
+        simLog.classList.add('hidden');
+        amountInput.value = '';
+        
+        refreshDashboard();
+        triggerToast('รีเซ็ตผลจำลองกลับสู่สเปรดชีตหลักแล้ว', 'success');
+      });
+    }
+
+    // Excel-simulation (CSV Export with BOM for perfect Thai reading)
+    function initExcelExport() {
+      const exportBtn = document.getElementById('exportExcelBtn');
+      exportBtn.addEventListener('click', () => {
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // Prepend Thai BOM UTF-8 bytes
+        csvContent += "รหัสบัญชี,ชื่อบัญชีทำการ,หมวดหมู่,งบประมาณปี 2569 (บาท),ใช้จริงสะสม (บาท),คงเหลือ (บาท),เปอร์เซ็นต์คงเหลือ (%)\n";
+
+        peaAccounts.forEach(acc => {
+          const remain = acc.budget - acc.spent;
+          const remainPct = acc.budget > 0 ? ((remain / acc.budget) * 100).toFixed(2) : '100.00';
+          const thaiCat = categoryMapping[acc.category]?.thName || acc.category;
+
+          csvContent += `"${acc.code}","${acc.name}","${thaiCat}",${acc.budget.toFixed(2)},${acc.spent.toFixed(2)},${remain.toFixed(2)},${remainPct}\n`;
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `รายงานวิเคราะห์คุมงบทำการ_ผจฟ2_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        triggerToast('ดาวน์โหลดเอกสารรายงานคุมงบ (CSV) เรียบร้อย', 'success');
+      });
+    }
+
+    // Dynamic Filter actions
+    function initFilterActions() {
+      document.getElementById('tableSearch').addEventListener('input', renderPeaTable);
+      document.getElementById('tableCategoryFilter').addEventListener('change', renderPeaTable);
+    }
+
+    // Onload Setup
+    window.onload = function() {
+      initConfigActions();
+      initSimulatorActions();
+      initExcelExport();
+      initFilterActions();
+      
+      // Start Live integration on startup
+      fetchGoogleSheetLive(currentSpreadsheetId);
+    }
+  </script>
+</body>
+</html>
