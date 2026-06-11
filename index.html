@@ -3,16 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบวิเคราะห์ข้อมูลคุมงบทำการ ผจฟ.2 (ปีงบประมาณ 2569)</title>
+  <title>ระบบวิเคราะห์ข้อมูลคุมงบทำการ ผจฟ.1 & ผจฟ.2 (ปีงบประมาณ 2569)</title>
   
+  <!-- Google Fonts: Sarabun & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
+  <!-- FontAwesome for Premium Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <script>
@@ -61,42 +65,49 @@
 </head>
 <body class="bg-[#f8f9fa] text-slate-800 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300 font-sans min-h-screen flex flex-col">
 
+  <!-- Top Banner / Navbar -->
   <header class="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-30 transition-colors duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
+        <!-- Logo and Title -->
         <div class="flex items-center space-x-3">
           <div class="w-10 h-10 bg-pea-500 rounded-xl flex items-center justify-center text-white shadow-md shadow-pea-500/20">
             <i class="fa-solid fa-layer-group text-lg"></i>
           </div>
           <div>
             <h1 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-tight">
-              คุมงบทำการ ผจฟ.2 <span class="text-pea-500">PEA</span>
+              คุมงบทำการ <span class="text-pea-500">ผจฟ.1 & ผจฟ.2</span>
             </h1>
             <p class="text-xs text-slate-500 dark:text-slate-400">
-              พอร์ทัลวิเคราะห์สถานะงบประมาณปี 2569 คาดการณ์สด
+              พอร์ทัลวิเคราะห์สถานะและผสานรวมงบประมาณปี 2569
             </p>
           </div>
         </div>
 
+        <!-- Toolbar controls -->
         <div class="flex items-center space-x-3">
+          <!-- Live Status Badge -->
           <div id="liveSyncBadge" class="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all">
             <span class="relative flex h-2 w-2">
               <span id="syncIndicatorPing" class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"></span>
               <span id="syncIndicatorDot" class="relative inline-flex rounded-full h-2 w-2"></span>
             </span>
-            <span id="syncStatusText">กำลังเชื่อมต่อข้อมูลชีต...</span>
+            <span id="syncStatusText">กำลังเชื่อมต่อชีต...</span>
           </div>
 
+          <!-- Manual Sync Online Button -->
           <button id="manualSyncBtn" class="px-3 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg flex items-center space-x-1.5 transition-all shadow-sm">
             <i id="syncBtnIcon" class="fa-solid fa-arrows-rotate"></i>
-            <span>ซิงค์ข้อมูลล่าสุด</span>
+            <span>ซิงค์งบออนไลน์</span>
           </button>
 
+          <!-- Configuration Panel Trigger -->
           <button id="openConfigBtn" class="px-3 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-lg flex items-center space-x-1 transition-all">
             <i class="fa-solid fa-cog"></i>
             <span class="hidden sm:inline">ตั้งค่าลิงก์ชีต</span>
           </button>
           
+          <!-- Theme Toggle -->
           <button id="themeToggle" class="w-9 h-9 flex items-center justify-center bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors text-slate-600 dark:text-slate-300">
             <i class="fa-solid fa-moon dark:hidden"></i>
             <i class="fa-solid fa-sun hidden dark:block"></i>
@@ -106,57 +117,99 @@
     </div>
   </header>
 
+  <!-- Mobile Status Bar -->
   <div id="mobileStatusBar" class="md:hidden text-center text-[11px] py-1.5 px-4 font-medium transition-colors border-b">
     <i class="fa-solid fa-circle-nodes mr-1"></i> <span id="mobileStatusText">กำลังดึงข้อมูล...</span>
   </div>
 
+  <!-- Main Content Layout -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- Switcher Bar (ผจฟ.1 / ผจฟ.2 / รวมทั้งหมด) -->
+    <div class="mb-6">
+      <div class="max-w-md mx-auto p-1 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex space-x-1">
+        <button id="viewFajof1Btn" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 focus:outline-none flex items-center justify-center space-x-1 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200">
+          <i class="fa-solid fa-bolt-lightning text-amber-500"></i>
+          <span>งบ ผจฟ.1</span>
+        </button>
+        <button id="viewFajof2Btn" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 focus:outline-none flex items-center justify-center space-x-1 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200">
+          <i class="fa-solid fa-bolt-lightning text-purple-500"></i>
+          <span>งบ ผจฟ.2</span>
+        </button>
+        <button id="viewCombinedBtn" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 focus:outline-none flex items-center justify-center space-x-1 bg-pea-500 text-white shadow-md shadow-pea-500/20">
+          <i class="fa-solid fa-diagram-project text-white"></i>
+          <span>รวมทั้งหมด</span>
+        </button>
+      </div>
+    </div>
     
+    <!-- Spreadsheet Config Collapsible Panel -->
     <div id="configPanel" class="hidden mb-6 bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm transition-all duration-300">
       <div class="flex justify-between items-center mb-3">
         <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center">
-          <i class="fa-solid fa-link text-pea-500 mr-2"></i>
-          การตั้งค่าเชื่อมโยงข้อมูล Google Sheet
+          <i class="fa-solid fa-sliders text-pea-500 mr-2"></i>
+          ตั้งค่าเชื่อมโยงสเปรดชีตรายสาขา (ผจฟ.1 & ผจฟ.2)
         </h3>
         <button id="closeConfigBtn" class="text-slate-400 hover:text-slate-600 text-sm"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <p class="text-xs text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-        ข้อมูลแดชบอร์ดด้านล่างจะดึงจาก Google Sheet ของท่านอัตโนมัติ หากต้องการเปลี่ยนไปดึงข้อมูลจากชีตอื่นหรือบัญชีอื่น 
-        ให้ทำการ<strong>แชร์สเปรดชีตนั้นเป็นสาธารณะ (ทุกคนที่มีลิงก์มีสิทธิ์อ่าน)</strong> จากนั้นคัดลอกลิงก์หรือ Spreadsheet ID มาระบุที่ช่องด้านล่างนี้
+        ข้อมูลคุมงบทำการจะดึงแบบสดจาก Google Sheets แตกต่างกันของ ผจฟ.1 และ ผจฟ.2 โปรดตรวจสอบให้แน่ใจว่าได้เปิดสิทธิ์การแชร์ของทั้งสองชีตเป็น 
+        <strong>"ทุกคนที่มีลิงก์มีสิทธิ์อ่าน (Viewer)"</strong> เพื่อให้หน้าเว็บบราวเซอร์สามารถดึงและผสานรวมงบประมาณได้สำเร็จ
       </p>
       
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
-        <div class="md:col-span-3">
-          <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">Google Sheet URL หรือ Spreadsheet ID</label>
-          <input id="sheetUrlInput" type="text" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pea-500 focus:outline-none" placeholder="วางลิงก์ Google Sheet หรือใส่เฉพาะ ID ของชีตได้ทันที...">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Input Sheet 1 -->
+        <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center">
+            <i class="fa-solid fa-bolt-lightning text-amber-500 mr-1.5"></i>
+            สเปรดชีตงบทำการ ผจฟ.1 (ID หรือ URL)
+          </label>
+          <input id="sheetUrl1Input" type="text" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pea-500 focus:outline-none" placeholder="ป้อน Spreadsheet ID หรือลิงก์ ผจฟ.1...">
+          <span class="text-[10px] text-slate-400 mt-1 block truncate" id="statusLabelSheet1">สถานะ: รอการตรวจสอบ</span>
         </div>
-        <div class="md:col-span-1 flex space-x-2">
-          <button id="saveConfigBtn" class="flex-1 py-2 bg-pea-500 hover:bg-pea-600 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 h-[34px]">
-            <i class="fa-solid fa-sync"></i>
-            <span>บันทึกและเชื่อมข้อมูล</span>
-          </button>
-          <button id="resetToDefaultSheetBtn" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 h-[34px]" title="รีเซ็ตเป็นลิงก์เริ่มต้น">
-            <i class="fa-solid fa-rotate-left"></i>
-          </button>
+
+        <!-- Input Sheet 2 -->
+        <div class="p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center">
+            <i class="fa-solid fa-bolt-lightning text-purple-500 mr-1.5"></i>
+            สเปรดชีตงบทำการ ผจฟ.2 (ID หรือ URL)
+          </label>
+          <input id="sheetUrl2Input" type="text" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pea-500 focus:outline-none" placeholder="ป้อน Spreadsheet ID หรือลิงก์ ผจฟ.2...">
+          <span class="text-[10px] text-slate-400 mt-1 block truncate" id="statusLabelSheet2">สถานะ: รอการตรวจสอบ</span>
         </div>
+      </div>
+
+      <!-- Action Panel Buttons -->
+      <div class="mt-4 flex space-x-2 justify-end">
+        <button id="resetToDefaultSheetBtn" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 transition-all">
+          <i class="fa-solid fa-rotate-left mr-1"></i> คืนค่าเริ่มต้นของระบบ
+        </button>
+        <button id="saveConfigBtn" class="px-5 py-2 bg-pea-500 hover:bg-pea-600 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center space-x-1.5">
+          <i class="fa-solid fa-cloud-arrow-down"></i>
+          <span>บันทึกและเชื่อมโยงสองชีต</span>
+        </button>
       </div>
     </div>
 
+    <!-- KPI Summary Section -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       
+      <!-- Card 1: Total Budget -->
       <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-4 transition-all hover:shadow-md">
         <div class="p-3 bg-pea-50 dark:bg-pea-950/30 text-pea-500 dark:text-pea-400 rounded-xl">
           <i class="fa-solid fa-wallet text-2xl"></i>
         </div>
         <div>
-          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">งบประมาณปี 2569</p>
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">งบประมาณรวมปี 2569</p>
           <h3 id="kpiTotalBudget" class="text-2xl font-bold text-slate-900 dark:text-white mt-1">฿0.00</h3>
           <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1 flex items-center">
-            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1"></span> อัปเดตล่าสุดจากชีตต้นทาง
+            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1" id="liveIndicatorDot"></span> 
+            <span id="kpiDataSourceName">ข้อมูลรวม ผจฟ.1 + ผจฟ.2</span>
           </p>
         </div>
       </div>
 
+      <!-- Card 2: Total Spent -->
       <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-4 transition-all hover:shadow-md">
         <div class="p-3 bg-amber-50 dark:bg-amber-950/30 text-amber-500 dark:text-amber-400 rounded-xl">
           <i class="fa-solid fa-receipt text-2xl"></i>
@@ -174,6 +227,7 @@
         </div>
       </div>
 
+      <!-- Card 3: Total Remaining -->
       <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-4 transition-all hover:shadow-md">
         <div class="p-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 dark:text-emerald-400 rounded-xl">
           <i class="fa-solid fa-circle-dollar-to-slot text-2xl"></i>
@@ -191,6 +245,7 @@
         </div>
       </div>
 
+      <!-- Card 4: Account Warnings -->
       <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center space-x-4 transition-all hover:shadow-md">
         <div id="alertIndicatorIcon" class="p-3 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 dark:text-emerald-400 rounded-xl">
           <i class="fa-solid fa-shield-check text-2xl"></i>
@@ -204,12 +259,14 @@
 
     </div>
 
+    <!-- Analytics Charts Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
       
+      <!-- Chart Column 1: Overall Doughnut (Utilization) -->
       <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-1 flex flex-col justify-between">
         <div class="mb-4">
           <h4 class="text-sm font-bold text-slate-900 dark:text-white">ภาพรวมความก้าวหน้าการเบิกจ่าย</h4>
-          <p class="text-xs text-slate-500 dark:text-slate-400">สัดส่วนยอดที่ใช้ไปแล้วเปรียบเทียบกับงบที่ยังเหลือ</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400" id="utilizationSubText">สัดส่วนยอดเบิกจ่ายสะสมเปรียบเทียบงบประมาณคงเหลือ</p>
         </div>
         <div class="relative flex items-center justify-center h-52">
           <canvas id="utilizationChart"></canvas>
@@ -226,6 +283,7 @@
         </div>
       </div>
 
+      <!-- Chart Column 2: Budget Comparison (Categories) -->
       <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-1 flex flex-col justify-between">
         <div class="mb-4">
           <h4 class="text-sm font-bold text-slate-900 dark:text-white">สัดส่วนค่าใช้จ่ายแบ่งตามกลุ่มบัญชีหลัก</h4>
@@ -242,6 +300,7 @@
         </div>
       </div>
 
+      <!-- Chart Column 3: Top Accounts (Bar Chart) -->
       <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-1 flex flex-col justify-between">
         <div class="mb-4">
           <h4 class="text-sm font-bold text-slate-900 dark:text-white">5 อันดับรหัสบัญชีที่ใช้งบประมาณสูงสุด</h4>
@@ -254,54 +313,111 @@
 
     </div>
 
+    <!-- Simulator & Live Alert Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
       
+      <!-- Interactive Budget Comparison Panel -->
       <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-2">
         <div class="flex justify-between items-center mb-4 border-b border-slate-100 dark:border-slate-700 pb-3">
           <div class="flex items-center space-x-2">
             <span class="w-8 h-8 rounded-lg bg-pea-50 dark:bg-pea-950/30 text-pea-500 dark:text-pea-400 flex items-center justify-center">
-              <i class="fa-solid fa-cube text-sm"></i>
+              <i class="fa-solid fa-code-compare text-sm"></i>
             </span>
             <div>
-              <h4 class="text-sm font-bold text-slate-900 dark:text-white">กล่องจำลองการเบิกจ่ายงบประมาณ (PEA Budget Simulator)</h4>
-              <p class="text-xs text-slate-500 dark:text-slate-400">ทดลองจ่ายเงินในรหัสบัญชีต่าง ๆ เพื่อดูการอัปเดตบนกราฟและตารางแบบเรียลไทม์</p>
+              <h4 class="text-sm font-bold text-slate-900 dark:text-white">เครื่องมือเปรียบเทียบงบประมาณ ผจฟ.1 vs ผจฟ.2 (PEA Budget Comparator)</h4>
+              <p class="text-xs text-slate-500 dark:text-slate-400">เลือกบัญชีทำการเพื่อวิเคราะห์และเปรียบเทียบตัวเลขรายรหัสระหว่างสองสาขา</p>
             </div>
           </div>
-          <button id="resetSim" class="text-xs px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 font-semibold rounded-lg text-slate-600 dark:text-slate-300 transition-colors flex items-center space-x-1">
-            <i class="fa-solid fa-rotate-left text-[10px]"></i>
-            <span>รีเซ็ตค่าเดิม</span>
-          </button>
         </div>
 
-        <form id="simForm" class="grid grid-cols-1 sm:grid-cols-3 gap-4" onsubmit="event.preventDefault();">
-          
-          <div class="sm:col-span-1">
-            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">เลือกรหัสบัญชี</label>
-            <select id="simAccountSelect" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pea-500 focus:outline-none">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Account Selection Dropdown -->
+          <div class="md:col-span-1 space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">เลือกรหัสบัญชีทำการ</label>
+              <select id="compareAccountSelect" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-pea-500 focus:outline-none font-semibold">
+                <!-- Loaded dynamically with codes -->
               </select>
-          </div>
-
-          <div class="sm:col-span-1">
-            <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1.5">จำนวนเงินที่เบิกจ่าย (บาท)</label>
-            <div class="relative">
-              <span class="absolute left-3 top-2 text-slate-400 text-xs font-bold">฿</span>
-              <input id="simAmount" type="number" min="1" step="0.01" placeholder="เช่น 25,000" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl pl-7 pr-3 py-2 text-xs focus:ring-2 focus:ring-pea-500 focus:outline-none font-semibold">
+            </div>
+            <div class="p-3.5 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-100 dark:border-slate-800">
+              <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">บัญชีที่กำลังตรวจสอบ</p>
+              <h5 id="compareAccountCode" class="text-sm font-bold text-pea-500 mt-1">รหัสบัญชี</h5>
+              <p id="compareAccountName" class="text-xs text-slate-600 dark:text-slate-300 mt-1 font-semibold leading-relaxed">ชื่อรหัสบัญชีทำการ</p>
             </div>
           </div>
 
-          <div class="sm:col-span-1 flex items-end">
-            <button id="submitSimBtn" type="button" class="w-full py-2 bg-pea-500 hover:bg-pea-600 text-white rounded-xl text-xs font-bold shadow-md shadow-pea-500/10 hover:shadow-lg transition-all flex items-center justify-center space-x-2 h-[34px]">
-              <i class="fa-solid fa-plus-circle"></i>
-              <span>บันทึกและคำนวณกราฟ</span>
-            </button>
-          </div>
-          
-        </form>
+          <!-- Comparison Details -->
+          <div class="md:col-span-2 space-y-4">
+            <!-- Visual Bar Comparison -->
+            <div class="space-y-3.5">
+              <!-- Comparison Bar: Budget -->
+              <div>
+                <div class="flex justify-between text-xs font-semibold mb-1">
+                  <span class="text-slate-500 dark:text-slate-400">งบประมาณที่ได้รับจัดสรร</span>
+                  <div class="space-x-3 text-[11px]">
+                    <span class="text-amber-500">ผจฟ.1: <span id="compBudgetF1Text">฿0.00</span></span>
+                    <span class="text-purple-500">ผจฟ.2: <span id="compBudgetF2Text">฿0.00</span></span>
+                  </div>
+                </div>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 h-3 rounded-full flex overflow-hidden">
+                  <div id="compBudgetF1Bar" class="bg-amber-500 h-full transition-all duration-500" style="width: 50%"></div>
+                  <div id="compBudgetF2Bar" class="bg-purple-500 h-full transition-all duration-500" style="width: 50%"></div>
+                </div>
+              </div>
 
-        <div id="simLog" class="hidden mt-4 p-3 bg-pea-50/50 dark:bg-pea-950/10 border border-pea-100 dark:border-pea-900/30 rounded-xl text-xs text-pea-800 dark:text-pea-400">
+              <!-- Comparison Bar: Spent -->
+              <div>
+                <div class="flex justify-between text-xs font-semibold mb-1">
+                  <span class="text-slate-500 dark:text-slate-400">ยอดเงินใช้จริงสะสม</span>
+                  <div class="space-x-3 text-[11px]">
+                    <span class="text-amber-500">ผจฟ.1: <span id="compSpentF1Text">฿0.00</span></span>
+                    <span class="text-purple-500">ผจฟ.2: <span id="compSpentF2Text">฿0.00</span></span>
+                  </div>
+                </div>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 h-3 rounded-full flex overflow-hidden">
+                  <div id="compSpentF1Bar" class="bg-amber-500 h-full transition-all duration-500" style="width: 50%"></div>
+                  <div id="compSpentF2Bar" class="bg-purple-500 h-full transition-all duration-500" style="width: 50%"></div>
+                </div>
+              </div>
+
+              <!-- Comparison Bar: Remaining -->
+              <div>
+                <div class="flex justify-between text-xs font-semibold mb-1">
+                  <span class="text-slate-500 dark:text-slate-400">ยอดเงินคงเหลือสุทธิ</span>
+                  <div class="space-x-3 text-[11px]">
+                    <span class="text-amber-500">ผจฟ.1: <span id="compRemainingF1Text">฿0.00</span></span>
+                    <span class="text-purple-500">ผจฟ.2: <span id="compRemainingF2Text">฿0.00</span></span>
+                  </div>
+                </div>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 h-3 rounded-full flex overflow-hidden">
+                  <div id="compRemainingF1Bar" class="bg-amber-500 h-full transition-all duration-500" style="width: 50%"></div>
+                  <div id="compRemainingF2Bar" class="bg-purple-500 h-full transition-all duration-500" style="width: 50%"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Summary Stats Card -->
+            <div class="grid grid-cols-2 gap-3 pt-2">
+              <div class="p-3 bg-amber-50/40 dark:bg-amber-950/10 border border-amber-100 dark:border-amber-900/30 rounded-xl text-xs">
+                <p class="font-bold text-amber-600 dark:text-amber-400 flex items-center">
+                  <span class="w-2 h-2 rounded-full bg-amber-500 mr-1.5 inline-block"></span> อัตราเบิกจ่าย ผจฟ.1
+                </p>
+                <p id="compUtilF1Text" class="text-base font-bold text-slate-800 dark:text-white mt-1">0.0%</p>
+                <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">เทียบวงเงินที่ ผจฟ.1 ได้รับ</p>
+              </div>
+              <div class="p-3 bg-purple-50/40 dark:bg-purple-950/10 border border-purple-100 dark:border-purple-900/30 rounded-xl text-xs">
+                <p class="font-bold text-purple-600 dark:text-purple-400 flex items-center">
+                  <span class="w-2 h-2 rounded-full bg-purple-500 mr-1.5 inline-block"></span> อัตราเบิกจ่าย ผจฟ.2
+                </p>
+                <p id="compUtilF2Text" class="text-base font-bold text-slate-800 dark:text-white mt-1">0.0%</p>
+                <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">เทียบวงเงินที่ ผจฟ.2 ได้รับ</p>
+              </div>
+            </div>
           </div>
+        </div>
       </div>
 
+      <!-- Alerts Panel -->
       <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm lg:col-span-1 flex flex-col justify-between">
         <div>
           <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-1">รหัสบัญชีที่ต้องเฝ้าระวังสูงสุด</h4>
@@ -309,22 +425,29 @@
         </div>
         
         <div id="alertsList" class="flex-grow space-y-3 overflow-y-auto max-h-52 pr-1">
-          </div>
+          <!-- Alert cards load dynamically -->
+        </div>
 
-        <p class="text-[10px] text-slate-400 mt-3 text-center">อัปเดตสัมพันธ์กับชีตและการจำลองของท่าน</p>
+        <p class="text-[10px] text-slate-400 mt-3 text-center">วิเคราะห์แบบสดจากฐานชีตปัจจุบันที่สลับเปิด</p>
       </div>
 
     </div>
 
+    <!-- Advanced Detailed Table -->
     <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden mb-6">
       
+      <!-- Table Header & Controls -->
       <div class="p-5 border-b border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h4 class="text-sm font-bold text-slate-900 dark:text-white">ตารางสรุปคุมบัญชีงบทำการ ผจฟ.2 ทั้งหมด</h4>
-          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">รวมรายการบัญชีทั้งหมดในชีต พร้อมแถบเปอร์เซ็นต์งบเหลือ</p>
+          <h4 class="text-sm font-bold text-slate-900 dark:text-white flex items-center">
+            <span id="tableTitleName">ตารางสรุปคุมบัญชีงบทำการทั้งหมด</span>
+          </h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">สรุปรายงานยอดรวมรายรหัส สัดส่วนใช้จริง คาดคงเหลือ และอัตราเบิกจ่าย</p>
         </div>
         
+        <!-- Table Actions -->
         <div class="flex flex-wrap items-center gap-3">
+          <!-- Search input -->
           <div class="relative w-full sm:w-56">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 dark:text-slate-500">
               <i class="fa-solid fa-search text-xs"></i>
@@ -332,6 +455,7 @@
             <input id="tableSearch" type="text" placeholder="พิมพ์รหัส หรือชื่อบัญชี..." class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl pl-9 pr-3 py-2 text-xs focus:ring-2 focus:ring-pea-500 focus:outline-none">
           </div>
 
+          <!-- Category filter -->
           <select id="tableCategoryFilter" class="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-pea-500 focus:outline-none">
             <option value="All">แสดงทุกหมวดหมู่</option>
             <option value="Travel & Personnel">หมวดบุคลากร & เดินทาง</option>
@@ -340,6 +464,7 @@
             <option value="Repair & Maintenance">หมวดซ่อมแซมบำรุงรักษา</option>
           </select>
 
+          <!-- Export Excel Simulation Button -->
           <button id="exportExcelBtn" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-colors shadow-sm">
             <i class="fa-solid fa-file-excel"></i>
             <span>ดาวน์โหลด Excel (CSV)</span>
@@ -347,6 +472,7 @@
         </div>
       </div>
 
+      <!-- Table Container -->
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs border-collapse">
           <thead>
@@ -354,17 +480,19 @@
               <th class="p-4">รหัสบัญชี</th>
               <th class="p-4">ชื่อรหัสบัญชีทำการ</th>
               <th class="p-4">หมวดหมู่</th>
-              <th class="p-4 text-right">งบประมาณ (฿)</th>
-              <th class="p-4 text-right">ใช้จริง (฿)</th>
-              <th class="p-4 text-right">คงเหลือ (฿)</th>
+              <th class="p-4 text-right">งบประมาณรวม (฿)</th>
+              <th class="p-4 text-right">ใช้จริงรวม (฿)</th>
+              <th class="p-4 text-right">คงเหลือรวม (฿)</th>
               <th class="p-4 text-center" style="min-width: 150px;">สัดส่วนงบประมาณคงเหลือ</th>
             </tr>
           </thead>
           <tbody id="tableBody" class="divide-y divide-slate-100 dark:divide-slate-700/50 text-slate-700 dark:text-slate-300">
-            </tbody>
+            <!-- Table rows render dynamically -->
+          </tbody>
         </table>
       </div>
 
+      <!-- Table Empty State -->
       <div id="tableEmptyState" class="hidden p-8 text-center">
         <div class="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 mx-auto mb-3">
           <i class="fa-solid fa-search"></i>
@@ -377,84 +505,93 @@
 
   </main>
 
+  <!-- Premium Toast Notification System -->
   <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 shadow-xl border border-slate-700/50 dark:border-slate-100 px-4 py-3 rounded-2xl text-xs font-medium max-w-sm flex items-center space-x-2.5 transition-all transform translate-y-20 opacity-0 pointer-events-none">
     <div id="toastIcon" class="w-6 h-6 rounded-full flex items-center justify-center text-white"></div>
-    <span id="toastMsg" class="flex-1">การจำลองวิเคราะห์ผลสำเร็จ</span>
+    <span id="toastMsg" class="flex-1">การประมวลผลเปรียบเทียบสำเร็จ</span>
   </div>
 
+  <!-- App Footer -->
   <footer class="bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 py-6 mt-auto transition-colors duration-300 text-xs text-slate-500 dark:text-slate-400">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:flex sm:justify-between sm:items-center">
       <p>
-        <span class="font-bold text-pea-500">ผจฟ.2 District Substation Live Dashboard</span> &copy; 2026 PEA Region 1. Fully Operational.
+        <span class="font-bold text-pea-500">PEA District Substation centralized Budget Dashboard</span> &copy; 2026 PEA Region 1. Fully Operational.
       </p>
       <div class="mt-2 sm:mt-0 flex items-center justify-center space-x-4">
-        <a id="sheetSourceLink" href="https://docs.google.com/spreadsheets/d/1d1M52VNyrn0ETkFWyO4Y-97YfGtOC45RyIyuqVLnTzk/edit?usp=sharing" target="_blank" class="hover:text-pea-500 flex items-center transition-colors">
-          <i class="fa-solid fa-file-invoice-dollar mr-1"></i> เปิดดูไฟล์ Google Sheet ต้นทาง
+        <a id="sheetSourceLink1" href="https://docs.google.com/spreadsheets/d/1toO4NuS6JuZk2FikMVihMkhsXoelK6c5gRr-yiTkT_U/edit?usp=sharing" target="_blank" class="hover:text-pea-500 flex items-center transition-colors">
+          <i class="fa-solid fa-file-invoice-dollar mr-1 text-amber-500"></i> เปิดชีต ผจฟ.1
+        </a>
+        <span class="text-slate-300 dark:text-slate-700">|</span>
+        <a id="sheetSourceLink2" href="https://docs.google.com/spreadsheets/d/1d1M52VNyrn0ETkFWyO4Y-97YfGtOC45RyIyuqVLnTzk/edit?usp=sharing" target="_blank" class="hover:text-pea-500 flex items-center transition-colors">
+          <i class="fa-solid fa-file-invoice-dollar mr-1 text-purple-500"></i> เปิดชีต ผจฟ.2
         </a>
       </div>
     </div>
   </footer>
 
   <script>
-    // System Theme Mode Logic
-    const themeToggleBtn = document.getElementById('themeToggle');
-    if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    // Config Default Spreadsheet IDs
+    const DEFAULT_SPREADSHEET_ID_1 = "1toO4NuS6JuZk2FikMVihMkhsXoelK6c5gRr-yiTkT_U"; // ผจฟ.1
+    const DEFAULT_SPREADSHEET_ID_2 = "1d1M52VNyrn0ETkFWyO4Y-97YfGtOC45RyIyuqVLnTzk"; // ผจฟ.2
 
-    themeToggleBtn.addEventListener('click', function() {
-      if (document.documentElement.classList.contains('dark')) {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('color-theme', 'light');
-      } else {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('color-theme', 'dark');
-      }
-      renderCharts();
-    });
+    let currentSheetId1 = localStorage.getItem('pea_sheet_id_1') || DEFAULT_SPREADSHEET_ID_1;
+    let currentSheetId2 = localStorage.getItem('pea_sheet_id_2') || DEFAULT_SPREADSHEET_ID_2;
 
-    // Default target Sheet ID derived from user URL
-    const DEFAULT_SPREADSHEET_ID = "1d1M52VNyrn0ETkFWyO4Y-97YfGtOC45RyIyuqVLnTzk";
-    let currentSpreadsheetId = localStorage.getItem('pea_spreadsheet_id') || DEFAULT_SPREADSHEET_ID;
+    // View State Manager: 'combined' | 'fajof1' | 'fajof2'
+    let currentView = 'combined';
 
-    // Static baseline backup snapshot
-    const initialBackupAccounts = [
-      { code: '52022010', name: 'ค่าพาหนะเดินทาง - พนักงาน', category: 'Travel & Personnel', budget: 5000.00, spent: 0.00 },
-      { code: '52022020', name: 'ค่าเบี้ยเลี้ยง - พนักงาน', category: 'Travel & Personnel', budget: 75000.00, spent: 10680.00 },
-      { code: '52022030', name: 'ค่าที่พัก - พนักงาน', category: 'Travel & Personnel', budget: 80000.00, spent: 9750.00 },
-      { code: '53030010', name: 'ค่าวัสดุสำนักงาน', category: 'Supplies & Utilities', budget: 11000.00, spent: 0.00 },
-      { code: '53030030', name: 'ค่าวัสดุเบ็ดเตล็ด', category: 'Supplies & Utilities', budget: 30000.00, spent: 17990.00 },
-      { code: '53031010', name: 'ค่าน้ำดื่มสำนักงาน', category: 'Supplies & Utilities', budget: 3550.00, spent: 0.00 },
-      { code: '53031020', name: 'ค่าน้ำประปาสำนักงาน', category: 'Supplies & Utilities', budget: 365000.00, spent: 62370.69 },
-      { code: '53033010', name: 'ค่าเช่าที่ดินเสารับส่งสัญญาณ', category: 'Services & Rent', budget: 0.00, spent: 0.00 },
-      { code: '53034010', name: 'ค่าจ้างเหมาทำความสะอาดสำนักงาน', category: 'Services & Rent', budget: 0.00, spent: 0.00 },
-      { code: '53034030', name: 'ค่าจ้างบำรุงรักษาสวนบริเวณสถานี', category: 'Services & Rent', budget: 219000.00, spent: 147505.00 },
-      { code: '53034040', name: 'ค่าบำรุงรักษาความสะอาดบริเวณสำนักงาน', category: 'Services & Rent', budget: 350000.00, spent: 109687.00 },
-      { code: '53039010', name: 'ค่าเชื้อเพลิงยานพาหนะของรัฐ', category: 'Supplies & Utilities', budget: 120000.00, spent: 0.00 },
-      { code: '53039990', name: 'ค่าใช้จ่ายเบ็ดเตล็ดทั่วไป', category: 'Supplies & Utilities', budget: 25000.00, spent: 0.00 },
-      { code: '53051030', name: 'ค่าซ่อมแซมระบบไฟฟ้าและระบบแอร์', category: 'Repair & Maintenance', budget: 0.00, spent: 0.00 },
-      { code: '53051040', name: 'ค่าซ่อมฯบำรุงรักษาอาคารสำนักงาน', category: 'Repair & Maintenance', budget: 500000.00, spent: 413300.00 },
-      { code: '53051050', name: 'ค่าซ่อมบำรุงรักษายานพาหนะ', category: 'Repair & Maintenance', budget: 15000.00, spent: 0.00 },
-      { code: '53051060', name: 'ค่าซ่อมบำรุงรักษาคอมพิวเตอร์', category: 'Repair & Maintenance', budget: 10000.00, spent: 0.00 },
-      { code: '53051090', name: 'ค่าวัสดุเบ็ดเตล็ดงานช่าง', category: 'Repair & Maintenance', budget: 30000.00, spent: 7062.00 },
-      { code: '53051100', name: 'ค่าซ่อมแซมและบำรุงรักษาอุปกรณ์สถานีไฟฟ้า', category: 'Repair & Maintenance', budget: 500000.00, spent: 169665.00 }
-    ];
+    // Global in-memory storage of fetched accounts
+    let rawAccountsFajof1 = [];
+    let rawAccountsFajof2 = [];
+    
+    // Active dataset currently displayed (could be individual or merged)
+    let peaAccounts = [];
 
-    let initialLiveAccounts = []; 
-    let peaAccounts = [];         
-
+    // Category style mapping
     const categoryMapping = {
-      'Travel & Personnel': { thName: 'เดินทาง & บุคลากร', color: 'rgba(156, 39, 176, 1)', border: '#9c27b0' },
+      'Travel & Personnel': { thName: 'เดินทาง & พนักงาน', color: 'rgba(156, 39, 176, 1)', border: '#9c27b0' },
       'Supplies & Utilities': { thName: 'วัสดุ & สาธารณูปโภค', color: 'rgba(59, 130, 246, 1)', border: '#3b82f6' },
       'Services & Rent': { thName: 'เช่า & จ้างบริการ', color: 'rgba(245, 158, 11, 1)', border: '#f59e0b' },
       'Repair & Maintenance': { thName: 'ซ่อมแซมบำรุงรักษา', color: 'rgba(244, 63, 94, 1)', border: '#f43f5e' }
     };
 
+    // Chart.js instances
     let utilizationChartInstance = null;
     let categoryChartInstance = null;
     let topAccountsChartInstance = null;
+
+    // Offline backups to safeguard initial loading if CORS/network fails
+    const backupFajof1 = [
+      { code: '52022010', name: 'ค่าพาหนะเดินทาง - พนักงาน (ผจฟ.1)', category: 'Travel & Personnel', budget: 12000.00, spent: 400.00 },
+      { code: '52022020', name: 'ค่าเบี้ยเลี้ยง - พนักงาน (ผจฟ.1)', category: 'Travel & Personnel', budget: 85000.00, spent: 15400.00 },
+      { code: '52022030', name: 'ค่าที่พัก - พนักงาน (ผจฟ.1)', category: 'Travel & Personnel', budget: 60000.00, spent: 8500.00 },
+      { code: '53030010', name: 'ค่าวัสดุสำนักงาน', category: 'Supplies & Utilities', budget: 20000.00, spent: 2300.00 },
+      { code: '53030030', name: 'ค่าวัสดุเบ็ดเตล็ด', category: 'Supplies & Utilities', budget: 45000.00, spent: 22000.00 },
+      { code: '53031010', name: 'ค่าน้ำดื่มสำนักงาน', category: 'Supplies & Utilities', budget: 5000.00, spent: 1200.00 },
+      { code: '53031020', name: 'ค่าน้ำประปาสำนักงาน', category: 'Supplies & Utilities', budget: 280000.00, spent: 45000.00 },
+      { code: '53034030', name: 'ค่าจ้างบำรุงรักษาสวนบริเวณสถานี', category: 'Services & Rent', budget: 180000.00, spent: 90000.00 },
+      { code: '53034040', name: 'ค่าบำรุงรักษาความสะอาดบริเวณสำนักงาน', category: 'Services & Rent', budget: 300000.00, spent: 150000.00 },
+      { code: '53039010', name: 'ค่าเชื้อเพลิงยานพาหนะของรัฐ', category: 'Supplies & Utilities', budget: 150000.00, spent: 34000.00 },
+      { code: '53051040', name: 'ค่าซ่อมฯบำรุงรักษาอาคารสำนักงาน', category: 'Repair & Maintenance', budget: 400000.00, spent: 180000.00 },
+      { code: '53051100', name: 'ค่าซ่อมแซมและบำรุงรักษาอุปกรณ์สถานีไฟฟ้า', category: 'Repair & Maintenance', budget: 600000.00, spent: 340000.00 }
+    ];
+
+    const backupFajof2 = [
+      { code: '52022010', name: 'ค่าพาหนะเดินทาง - พนักงาน (ผจฟ.2)', category: 'Travel & Personnel', budget: 5000.00, spent: 0.00 },
+      { code: '52022020', name: 'ค่าเบี้ยเลี้ยง - พนักงาน (ผจฟ.2)', category: 'Travel & Personnel', budget: 75000.00, spent: 10680.00 },
+      { code: '52022030', name: 'ค่าที่พัก - พนักงาน (ผจฟ.2)', category: 'Travel & Personnel', budget: 80000.00, spent: 9750.00 },
+      { code: '53030010', name: 'ค่าวัสดุสำนักงาน', category: 'Supplies & Utilities', budget: 11000.00, spent: 0.00 },
+      { code: '53030030', name: 'ค่าวัสดุเบ็ดเตล็ด', category: 'Supplies & Utilities', budget: 30000.00, spent: 17990.00 },
+      { code: '53031010', name: 'ค่าน้ำดื่มสำนักงาน', category: 'Supplies & Utilities', budget: 3550.00, spent: 0.00 },
+      { code: '53031020', name: 'ค่าน้ำประปาสำนักงาน', category: 'Supplies & Utilities', budget: 365000.00, spent: 62370.69 },
+      { code: '53034030', name: 'ค่าจ้างบำรุงรักษาสวนบริเวณสถานี', category: 'Services & Rent', budget: 219000.00, spent: 147505.00 },
+      { code: '53034040', name: 'ค่าบำรุงรักษาความสะอาดบริเวณสำนักงาน', category: 'Services & Rent', budget: 350000.00, spent: 109687.00 },
+      { code: '53039010', name: 'ค่าเชื้อเพลิงยานพาหนะของรัฐ', category: 'Supplies & Utilities', budget: 120000.00, spent: 0.00 },
+      { code: '53039990', name: 'ค่าใช้จ่ายเบ็ดเตล็ดทั่วไป', category: 'Supplies & Utilities', budget: 25000.00, spent: 0.00 },
+      { code: '53051040', name: 'ค่าซ่อมฯบำรุงรักษาอาคารสำนักงาน', category: 'Repair & Maintenance', budget: 500000.00, spent: 413300.00 },
+      { code: '53051090', name: 'ค่าวัสดุเบ็ดเตล็ดงานช่าง', category: 'Repair & Maintenance', budget: 30000.00, spent: 7062.00 },
+      { code: '53051100', name: 'ค่าซ่อมแซมและบำรุงรักษาอุปกรณ์สถานีไฟฟ้า', category: 'Repair & Maintenance', budget: 500000.00, spent: 169665.00 }
+    ];
 
     function triggerToast(message, type = 'success') {
       const toast = document.getElementById('toast');
@@ -480,6 +617,190 @@
 
     function formatCurrency(val) {
       return new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(val);
+    }
+
+    // Google Sheet Query Parser - Locks onto Col A, B, C, D
+    async function fetchIndividualSheet(sheetId, sheetNameLabel) {
+      const queryUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
+      const response = await fetch(queryUrl);
+      if (!response.ok) throw new Error(`ไม่สามารถเชื่อมต่อชีต ${sheetNameLabel}`);
+      
+      const rawText = await response.text();
+      const jsonStart = rawText.indexOf('{');
+      const jsonEnd = rawText.lastIndexOf('}') + 1;
+      const json = JSON.parse(rawText.slice(jsonStart, jsonEnd));
+      const rows = json.table?.rows;
+      
+      if (!rows || rows.length === 0) throw new Error(`ไม่พบข้อมูลแถวใน ${sheetNameLabel}`);
+
+      const codeIdx = 0;   // A
+      const nameIdx = 1;   // B
+      const budgetIdx = 2; // C
+      const spentIdx = 3;  // D
+
+      const accountsList = [];
+
+      rows.forEach(row => {
+        const cells = row.c;
+        if (!cells || cells.length <= Math.max(codeIdx, nameIdx)) return;
+
+        let rawCode = "";
+        if (cells[codeIdx]) {
+          rawCode = cells[codeIdx].v !== null ? String(cells[codeIdx].v).trim() : "";
+          if (cells[codeIdx].f && rawCode.includes('E')) {
+            rawCode = String(cells[codeIdx].f).trim(); // scientific notation bypass
+          }
+        }
+
+        if (/^\d{8}$/.test(rawCode) || (cells[codeIdx]?.f && /^\d{8}$/.test(String(cells[codeIdx].f).trim()))) {
+          const finalCode = /^\d{8}$/.test(rawCode) ? rawCode : String(cells[codeIdx].f).trim();
+          const rawName = cells[nameIdx] ? String(cells[nameIdx].v || cells[nameIdx].f || '').trim() : '';
+          
+          let budgetVal = 0;
+          if (cells[budgetIdx] && cells[budgetIdx].v !== null) {
+            budgetVal = typeof cells[budgetIdx].v === 'number' ? cells[budgetIdx].v : parseFloat(String(cells[budgetIdx].v).replace(/[^0-9.-]/g, '')) || 0;
+          }
+
+          let spentVal = 0;
+          if (cells[spentIdx] && cells[spentIdx].v !== null) {
+            spentVal = typeof cells[spentIdx].v === 'number' ? cells[spentIdx].v : parseFloat(String(cells[spentIdx].v).replace(/[^0-9.-]/g, '')) || 0;
+          }
+
+          // Category classification by Account Code prefix
+          let category = 'Supplies & Utilities';
+          if (finalCode.startsWith('52')) {
+            category = 'Travel & Personnel';
+          } else if (finalCode.startsWith('53033') || finalCode.startsWith('53034')) {
+            category = 'Services & Rent';
+          } else if (finalCode.startsWith('5305')) {
+            category = 'Repair & Maintenance';
+          }
+
+          accountsList.push({
+            code: finalCode,
+            name: rawName,
+            category: category,
+            budget: budgetVal,
+            spent: spentVal
+          });
+        }
+      });
+
+      return accountsList;
+    }
+
+    // Synchronize both Sheets in parallel
+    async function syncOnlineData() {
+      updateSyncState('syncing', 'กำลังดึงข้อมูลงบ ผจฟ.1 และ ผจฟ.2 ออนไลน์...');
+      
+      let failSheet1 = false;
+      let failSheet2 = false;
+
+      // Fetch Sheet 1 (ผจฟ.1)
+      try {
+        rawAccountsFajof1 = await fetchIndividualSheet(currentSheetId1, 'ผจฟ.1');
+        document.getElementById('statusLabelSheet1').innerHTML = `สถานะ: <span class="text-emerald-500 font-bold">✓ ดึงข้อมูลสำเร็จ (${rawAccountsFajof1.length} รายการ)</span>`;
+      } catch (err) {
+        console.error("Failed to fetch Sheet 1", err);
+        rawAccountsFajof1 = JSON.parse(JSON.stringify(backupFajof1));
+        document.getElementById('statusLabelSheet1').innerHTML = `สถานะ: <span class="text-amber-500 font-bold">✗ ล้มเหลว (ใช้ข้อมูลสำรองแทน)</span>`;
+        failSheet1 = true;
+      }
+
+      // Fetch Sheet 2 (ผจฟ.2)
+      try {
+        rawAccountsFajof2 = await fetchIndividualSheet(currentSheetId2, 'ผจฟ.2');
+        document.getElementById('statusLabelSheet2').innerHTML = `สถานะ: <span class="text-emerald-500 font-bold">✓ ดึงข้อมูลสำเร็จ (${rawAccountsFajof2.length} รายการ)</span>`;
+      } catch (err) {
+        console.error("Failed to fetch Sheet 2", err);
+        rawAccountsFajof2 = JSON.parse(JSON.stringify(backupFajof2));
+        document.getElementById('statusLabelSheet2').innerHTML = `สถานะ: <span class="text-amber-500 font-bold">✗ ล้มเหลว (ใช้ข้อมูลสำรองแทน)</span>`;
+        failSheet2 = true;
+      }
+
+      // Check final state
+      if (failSheet1 || failSheet2) {
+        updateSyncState('fallback', 'โหมดออฟไลน์บางส่วน (ดึงข้อมูลบางสเปรดชีตล้มเหลว)');
+        triggerToast('แสดงข้อมูลงบล่าสุดรวมกับงบสำรองกรณีเกิดความล่าช้า', 'warning');
+      } else {
+        updateSyncState('live', 'เชื่อมต่อสเปรดชีต ผจฟ.1 และ ผจฟ.2 สำเร็จ');
+        triggerToast('ซิงค์ข้อมูล ผจฟ.1 และ ผจฟ.2 เรียลไทม์สมบูรณ์!', 'success');
+      }
+
+      applyViewFilter();
+    }
+
+    // Apply active view logic (Combined, fajof1, or fajof2)
+    function applyViewFilter() {
+      const activeBtnClass = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 focus:outline-none flex items-center justify-center space-x-1 bg-pea-500 text-white shadow-md shadow-pea-500/20";
+      const inactiveBtnClass = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 focus:outline-none flex items-center justify-center space-x-1 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-200 dark:hover:bg-slate-600";
+
+      document.getElementById('viewFajof1Btn').className = (currentView === 'fajof1') ? activeBtnClass : inactiveBtnClass;
+      document.getElementById('viewFajof2Btn').className = (currentView === 'fajof2') ? activeBtnClass : inactiveBtnClass;
+      document.getElementById('viewCombinedBtn').className = (currentView === 'combined') ? activeBtnClass : inactiveBtnClass;
+
+      const titleName = document.getElementById('tableTitleName');
+      const kpiSource = document.getElementById('kpiDataSourceName');
+      const utilSubText = document.getElementById('utilizationSubText');
+
+      if (currentView === 'fajof1') {
+        peaAccounts = JSON.parse(JSON.stringify(rawAccountsFajof1));
+        titleName.innerText = "ตารางรายงานคุมงบทำการ ผจฟ.1";
+        kpiSource.innerText = "ข้อมูลเฉพาะแผนก ผจฟ.1";
+        utilSubText.innerText = "สัดส่วนยอดเบิกจ่ายสะสมเปรียบเทียบงบประมาณ ผจฟ.1";
+      } else if (currentView === 'fajof2') {
+        peaAccounts = JSON.parse(JSON.stringify(rawAccountsFajof2));
+        titleName.innerText = "ตารางรายงานคุมงบทำการ ผจฟ.2";
+        kpiSource.innerText = "ข้อมูลเฉพาะแผนก ผจฟ.2";
+        utilSubText.innerText = "สัดส่วนยอดเบิกจ่ายสะสมเปรียบเทียบงบประมาณ ผจฟ.2";
+      } else {
+        // COMBINED VIEW: Group by Account Code and sum values
+        const mergedMap = {};
+        
+        // Populate Fajof 1 accounts
+        rawAccountsFajof1.forEach(acc => {
+          mergedMap[acc.code] = {
+            code: acc.code,
+            name: acc.name.replace(' (ผจฟ.1)', ''),
+            category: acc.category,
+            budget: acc.budget,
+            spent: acc.spent
+          };
+        });
+
+        // Add or Sum Fajof 2 accounts
+        rawAccountsFajof2.forEach(acc => {
+          const cleanName = acc.name.replace(' (ผจฟ.2)', '');
+          if (mergedMap[acc.code]) {
+            mergedMap[acc.code].budget += acc.budget;
+            mergedMap[acc.code].spent += acc.spent;
+          } else {
+            mergedMap[acc.code] = {
+              code: acc.code,
+              name: cleanName,
+              category: acc.category,
+              budget: acc.budget,
+              spent: acc.spent
+            };
+          }
+        });
+
+        peaAccounts = Object.values(mergedMap).sort((a, b) => parseInt(a.code) - parseInt(b.code));
+        titleName.innerText = "ตารางสรุปคุมบัญชีงบทำการ ผจฟ.1 + ผจฟ.2 (รวมศูนย์)";
+        kpiSource.innerText = "ข้อมูลผสานรวม ผจฟ.1 + ผจฟ.2";
+        utilSubText.innerText = "ภาพรวมงบสะสมเบิกจ่ายสุทธิของทั้งสองแผนก";
+      }
+
+      refreshDashboard();
+    }
+
+    function refreshDashboard() {
+      updateMetrics();
+      renderCharts();
+      renderAlertsList();
+      renderPeaTable();
+      loadComparisonSelect();
+      updateComparisonDetails();
     }
 
     function calculateFinancials() {
@@ -534,116 +855,6 @@
       mobileStatusText.innerText = message;
     }
 
-    // CRITICAL RE-MAPPING: ล็อคพิกัดคอลัมน์ของชีต ผจฟ.2 ตามจริง (Col A=รหัส, Col B=ชื่อรหัส, Col C=งบปี69, Col D=ใช้จริง)
-    async function fetchGoogleSheetLive(sheetId) {
-      updateSyncState('syncing', 'กำลังดึงข้อมูลจาก Google Sheet...');
-      
-      try {
-        // ดึงเฉพาะชีตแรก (งบทำการ) และดึงข้อมูลดิบในรูป JSON
-        const queryUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`;
-        const response = await fetch(queryUrl);
-        
-        if (!response.ok) throw new Error('ไม่สามารถเข้าถึงที่อยู่เอกสารได้');
-        
-        const rawText = await response.text();
-        const jsonStart = rawText.indexOf('{');
-        const jsonEnd = rawText.lastIndexOf('}') + 1;
-        if (jsonStart === -1 || jsonEnd === -1) throw new Error('โครงสร้างข้อมูลผิดรูปแบบ');
-        
-        const json = JSON.parse(rawText.slice(jsonStart, jsonEnd));
-        const rows = json.table?.rows;
-        
-        if (!rows || rows.length === 0) throw new Error('ไม่พบข้อมูลในสเปรดชีต');
-
-        // บังคับกำหนดดัชนีคอลัมน์คงที่เพื่อไม่ให้สับสนหัวตารางซ้อน
-        const codeIdx = 0;   // คอลัมน์ A (รหัสบัญชี 8 หลัก)
-        const nameIdx = 1;   // คอลัมน์ B (ชื่อรหัสบัญชีทำการ)
-        const budgetIdx = 2; // คอลัมน์ C (งบประมาณปี 2569)
-        const spentIdx = 3;  // คอลัมน์ D (ใช้จริงประจำปี)
-
-        const parsedLiveAccounts = [];
-
-        rows.forEach(row => {
-          const cells = row.c;
-          if (!cells || cells.length <= Math.max(codeIdx, nameIdx)) return;
-
-          // อ่านค่ารหัสบัญชี
-          let rawCode = "";
-          if (cells[codeIdx]) {
-            rawCode = cells[codeIdx].v !== null ? String(cells[codeIdx].v).trim() : "";
-            if (cells[codeIdx].f && rawCode.includes('E')) {
-              rawCode = String(cells[codeIdx].f).trim(); // ป้องกันเลขแปลงเป็น Scientific format (เช่น 5.2E+07)
-            }
-          }
-          
-          // ตรวจสอบความถูกต้องว่าเป็นรหัสบัญชี 8 หลักหรือไม่
-          if (/^\d{8}$/.test(rawCode) || (cells[codeIdx]?.f && /^\d{8}$/.test(String(cells[codeIdx].f).trim()))) {
-            const finalCode = /^\d{8}$/.test(rawCode) ? rawCode : String(cells[codeIdx].f).trim();
-            const rawName = cells[nameIdx] ? String(cells[nameIdx].v || cells[nameIdx].f || '').trim() : '';
-            
-            // สกัดค่าตัวเลขงบประมาณ
-            let budgetVal = 0;
-            if (cells[budgetIdx] && cells[budgetIdx].v !== null) {
-              budgetVal = typeof cells[budgetIdx].v === 'number' ? cells[budgetIdx].v : parseFloat(String(cells[budgetIdx].v).replace(/[^0-9.-]/g, '')) || 0;
-            }
-
-            // สกัดค่าตัวเลขเงินใช้จริง
-            let spentVal = 0;
-            if (cells[spentIdx] && cells[spentIdx].v !== null) {
-              spentVal = typeof cells[spentIdx].v === 'number' ? cells[spentIdx].v : parseFloat(String(cells[spentIdx].v).replace(/[^0-9.-]/g, '')) || 0;
-            }
-
-            // จัดกลุ่มหมวดหมู่หลักอัตโนมัติอิงตามโครงสร้าง PEA Account Code
-            let category = 'Supplies & Utilities';
-            if (finalCode.startsWith('52')) {
-              category = 'Travel & Personnel';
-            } else if (finalCode.startsWith('53033') || finalCode.startsWith('53034')) {
-              category = 'Services & Rent';
-            } else if (finalCode.startsWith('5305')) {
-              category = 'Repair & Maintenance';
-            }
-
-            parsedLiveAccounts.push({
-              code: finalCode,
-              name: rawName,
-              category: category,
-              budget: budgetVal,
-              spent: spentVal
-            });
-          }
-        });
-
-        if (parsedLiveAccounts.length > 0) {
-          // คัดลอกลงตัวแปร State เพื่ออัปเดตระบบ
-          initialLiveAccounts = JSON.parse(JSON.stringify(parsedLiveAccounts));
-          peaAccounts = JSON.parse(JSON.stringify(parsedLiveAccounts));
-          
-          updateSyncState('live', 'เชื่อมต่อข้อมูลสดเรียบร้อย');
-          triggerToast('ซิงค์และแมปปิ้งคอลัมน์ออนไลน์สำเร็จ!', 'success');
-          refreshDashboard();
-        } else {
-          throw new Error('โครงสร้างเซลล์ไม่ตรงรหัสบัญชี 8 หลัก');
-        }
-
-      } catch (err) {
-        console.error("Online sync failure, activating built-in storage fallback", err);
-        initialLiveAccounts = JSON.parse(JSON.stringify(initialBackupAccounts));
-        peaAccounts = JSON.parse(JSON.stringify(initialBackupAccounts));
-        
-        updateSyncState('fallback', 'โหมดออฟไลน์ (เชื่อมต่อชีตล้มเหลว)');
-        triggerToast('แสดงข้อมูลจำลอง! โปรดตรวจเช็คสิทธิ์แชร์ลิงก์เปิดเป็นสาธารณะ', 'warning');
-        refreshDashboard();
-      }
-    }
-
-    function refreshDashboard() {
-      updateMetrics();
-      renderCharts();
-      renderAlertsList();
-      renderPeaTable();
-      loadSimulatorSelect();
-    }
-
     function updateMetrics() {
       const stats = calculateFinancials();
 
@@ -690,6 +901,7 @@
       const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
       const labelColor = isDark ? '#94a3b8' : '#64748b';
 
+      // Chart 1: Utilization Doughnut
       const utilData = {
         labels: ['ใช้งบไปแล้ว', 'งบประมาณคงเหลือ'],
         datasets: [{
@@ -728,6 +940,7 @@
         });
       }
 
+      // Chart 2: Category Breakdown
       const categories = Object.keys(categoryMapping);
       const categoryBudgets = categories.map(cat => peaAccounts.filter(acc => acc.category === cat).reduce((sum, item) => sum + item.budget, 0));
       const categorySpents = categories.map(cat => peaAccounts.filter(acc => acc.category === cat).reduce((sum, item) => sum + item.spent, 0));
@@ -736,7 +949,7 @@
         labels: categories.map(cat => categoryMapping[cat].thName),
         datasets: [
           {
-            label: 'งบจัดสรร',
+            label: 'งบจัดสรรรวม',
             data: categoryBudgets,
             backgroundColor: 'rgba(156, 39, 176, 0.25)',
             borderColor: '#9c27b0',
@@ -744,7 +957,7 @@
             borderRadius: 6
           },
           {
-            label: 'ใช้จริง',
+            label: 'ใช้จริงรวม',
             data: categorySpents,
             backgroundColor: 'rgba(59, 130, 246, 0.85)',
             borderColor: '#3b82f6',
@@ -788,12 +1001,13 @@
         });
       }
 
+      // Chart 3: Top Accounts (Budget vs Spent)
       const top5Accounts = [...peaAccounts].sort((a, b) => b.spent - a.spent).slice(0, 5);
       const topData = {
         labels: top5Accounts.map(acc => `${acc.code} ${acc.name.substring(0, 8)}...`),
         datasets: [
           {
-            label: 'งบจัดสรร',
+            label: 'งบรวมสิทธิ์',
             data: top5Accounts.map(acc => acc.budget),
             backgroundColor: 'rgba(148, 163, 184, 0.2)',
             borderColor: 'rgba(148, 163, 184, 0.8)',
@@ -801,7 +1015,7 @@
             borderRadius: 4
           },
           {
-            label: 'ใช้จริง',
+            label: 'ใช้รวมจริง',
             data: top5Accounts.map(acc => acc.spent),
             backgroundColor: 'rgba(156, 39, 176, 0.85)',
             borderColor: '#9c27b0',
@@ -895,22 +1109,100 @@
               <i class="fa-solid fa-check"></i>
             </div>
             <h5 class="text-xs font-bold text-slate-900 dark:text-white">ปกติสุขทุกด้าน</h5>
-            <p class="text-[10px] text-slate-500 mt-1">งบประมาณและยอดเบิกจ่ายสัมพันธ์ตามเกณฑ์</p>
+            <p class="text-[10px] text-slate-500 mt-1">งบประมาณและยอดเบิกจ่ายสะสมเป็นไปตามกรอบ</p>
           </div>
         `;
       }
     }
 
-    function loadSimulatorSelect() {
-      const select = document.getElementById('simAccountSelect');
+    // Dynamic Account List Populator for Comparison Dropdown
+    function loadComparisonSelect() {
+      const select = document.getElementById('compareAccountSelect');
+      if (!select) return;
+
+      const currentSelected = select.value;
       select.innerHTML = '';
 
-      peaAccounts.forEach(acc => {
+      // Create a union map of unique account codes across both divisions
+      const unionMap = {};
+      rawAccountsFajof1.forEach(acc => {
+        unionMap[acc.code] = acc.name.replace(' (ผจฟ.1)', '');
+      });
+      rawAccountsFajof2.forEach(acc => {
+        unionMap[acc.code] = acc.name.replace(' (ผจฟ.2)', '');
+      });
+
+      const uniqueCodes = Object.keys(unionMap).sort((a, b) => parseInt(a) - parseInt(b));
+
+      uniqueCodes.forEach(code => {
         const opt = document.createElement('option');
-        opt.value = acc.code;
-        opt.text = `${acc.code} - ${acc.name.substring(0, 18)}... (งบ: ${formatCurrency(acc.budget)})`;
+        opt.value = code;
+        opt.text = `${code} - ${unionMap[code].substring(0, 30)}...`;
         select.appendChild(opt);
       });
+
+      // Restore previously selected value if it exists in the new union list
+      if (currentSelected && uniqueCodes.includes(currentSelected)) {
+        select.value = currentSelected;
+      }
+    }
+
+    // Live update function for the side-by-side comparator tool
+    function updateComparisonDetails() {
+      const select = document.getElementById('compareAccountSelect');
+      if (!select) return;
+
+      const code = select.value;
+      if (!code) return;
+
+      // Locate corresponding accounts
+      const f1Acc = rawAccountsFajof1.find(acc => acc.code === code) || { name: "", budget: 0, spent: 0 };
+      const f2Acc = rawAccountsFajof2.find(acc => acc.code === code) || { name: "", budget: 0, spent: 0 };
+
+      const finalName = f1Acc.name.replace(' (ผจฟ.1)', '') || f2Acc.name.replace(' (ผจฟ.2)', '') || 'ไม่พบข้อมูลชื่อบัญชี';
+
+      document.getElementById('compareAccountCode').innerText = `รหัสบัญชี: ${code}`;
+      document.getElementById('compareAccountName').innerText = finalName;
+
+      // Update budget amounts
+      document.getElementById('compBudgetF1Text').innerText = formatCurrency(f1Acc.budget);
+      document.getElementById('compBudgetF2Text').innerText = formatCurrency(f2Acc.budget);
+
+      // Update spent amounts
+      document.getElementById('compSpentF1Text').innerText = formatCurrency(f1Acc.spent);
+      document.getElementById('compSpentF2Text').innerText = formatCurrency(f2Acc.spent);
+
+      // Calculate and update remaining amounts
+      const remF1 = Math.max(0, f1Acc.budget - f1Acc.spent);
+      const remF2 = Math.max(0, f2Acc.budget - f2Acc.spent);
+      document.getElementById('compRemainingF1Text').innerText = formatCurrency(remF1);
+      document.getElementById('compRemainingF2Text').innerText = formatCurrency(remF2);
+
+      // Helper function to update proportional horizontal comparison bars
+      const setBarWidths = (bar1Id, bar2Id, val1, val2) => {
+        const bar1 = document.getElementById(bar1Id);
+        const bar2 = document.getElementById(bar2Id);
+        const total = val1 + val2;
+        if (total > 0) {
+          const p1 = (val1 / total) * 100;
+          bar1.style.width = `${p1}%`;
+          bar2.style.width = `${100 - p1}%`;
+        } else {
+          bar1.style.width = '50%';
+          bar2.style.width = '50%';
+        }
+      };
+
+      setBarWidths('compBudgetF1Bar', 'compBudgetF2Bar', f1Acc.budget, f2Acc.budget);
+      setBarWidths('compSpentF1Bar', 'compSpentF2Bar', f1Acc.spent, f2Acc.spent);
+      setBarWidths('compRemainingF1Bar', 'compRemainingF2Bar', remF1, remF2);
+
+      // Calculate and display utilization rates
+      const utilF1 = f1Acc.budget > 0 ? (f1Acc.spent / f1Acc.budget) * 100 : 0;
+      const utilF2 = f2Acc.budget > 0 ? (f2Acc.spent / f2Acc.budget) * 100 : 0;
+
+      document.getElementById('compUtilF1Text').innerText = `${utilF1.toFixed(1)}%`;
+      document.getElementById('compUtilF2Text').innerText = `${utilF2.toFixed(1)}%`;
     }
 
     function renderPeaTable() {
@@ -982,108 +1274,93 @@
       }
     }
 
+    // Tab view switcher click listeners
+    function initViewSwitcher() {
+      document.getElementById('viewFajof1Btn').addEventListener('click', () => {
+        currentView = 'fajof1';
+        applyViewFilter();
+        triggerToast('แสดงงบทำการสาขา ผจฟ.1 เรียบร้อย', 'success');
+      });
+
+      document.getElementById('viewFajof2Btn').addEventListener('click', () => {
+        currentView = 'fajof2';
+        applyViewFilter();
+        triggerToast('แสดงงบทำการสาขา ผจฟ.2 เรียบร้อย', 'success');
+      });
+
+      document.getElementById('viewCombinedBtn').addEventListener('click', () => {
+        currentView = 'combined';
+        applyViewFilter();
+        triggerToast('แสดงยอดรวมงบ ผจฟ.1 และ ผจฟ.2 สุทธิ', 'success');
+      });
+    }
+
     function initConfigActions() {
       const configPanel = document.getElementById('configPanel');
       const openConfigBtn = document.getElementById('openConfigBtn');
       const closeConfigBtn = document.getElementById('closeConfigBtn');
       const saveConfigBtn = document.getElementById('saveConfigBtn');
-      const sheetUrlInput = document.getElementById('sheetUrlInput');
+      const sheetUrl1Input = document.getElementById('sheetUrl1Input');
+      const sheetUrl2Input = document.getElementById('sheetUrl2Input');
       const resetToDefaultSheetBtn = document.getElementById('resetToDefaultSheetBtn');
-      const sheetSourceLink = document.getElementById('sheetSourceLink');
       const manualSyncBtn = document.getElementById('manualSyncBtn');
-      const syncBtnIcon = document.getElementById('syncBtnIcon');
 
-      if (manualSyncBtn) {
-        manualSyncBtn.addEventListener('click', () => {
-          if (syncBtnIcon) syncBtnIcon.classList.add('fa-spin');
-          fetchGoogleSheetLive(currentSpreadsheetId);
-        });
-      }
-
-      sheetUrlInput.value = currentSpreadsheetId;
+      sheetUrl1Input.value = currentSheetId1;
+      sheetUrl2Input.value = currentSheetId2;
 
       openConfigBtn.addEventListener('click', () => { configPanel.classList.toggle('hidden'); });
       closeConfigBtn.addEventListener('click', () => { configPanel.classList.add('hidden'); });
 
+      manualSyncBtn.addEventListener('click', () => {
+        syncOnlineData();
+      });
+
       saveConfigBtn.addEventListener('click', () => {
-        let inputVal = sheetUrlInput.value.trim();
-        if (!inputVal) {
-          triggerToast('กรุณาระบุที่อยู่ Google Sheet หรือรหัส ID', 'warning');
+        let val1 = sheetUrl1Input.value.trim();
+        let val2 = sheetUrl2Input.value.trim();
+
+        if (!val1 || !val2) {
+          triggerToast('กรุณาระบุที่อยู่สเปรดชีตให้ครบถ้วนทั้ง ผจฟ.1 และ ผจฟ.2', 'warning');
           return;
         }
 
-        if (inputVal.includes('/d/')) {
-          const parts = inputVal.split('/d/');
-          if (parts[1]) inputVal = parts[1].split('/')[0];
-        }
+        // Clean values to extract Spreadsheet ID if URLs are pasted
+        if (val1.includes('/d/')) val1 = val1.split('/d/')[1].split('/')[0];
+        if (val2.includes('/d/')) val2 = val2.split('/d/')[1].split('/')[0];
 
-        currentSpreadsheetId = inputVal;
-        localStorage.setItem('pea_spreadsheet_id', inputVal);
-        sheetSourceLink.href = `https://docs.google.com/spreadsheets/d/${inputVal}/edit?usp=sharing`;
-        
-        fetchGoogleSheetLive(inputVal);
+        currentSheetId1 = val1;
+        currentSheetId2 = val2;
+
+        localStorage.setItem('pea_sheet_id_1', val1);
+        localStorage.setItem('pea_sheet_id_2', val2);
+
+        document.getElementById('sheetSourceLink1').href = `https://docs.google.com/spreadsheets/d/${val1}/edit?usp=sharing`;
+        document.getElementById('sheetSourceLink2').href = `https://docs.google.com/spreadsheets/d/${val2}/edit?usp=sharing`;
+
         configPanel.classList.add('hidden');
+        syncOnlineData();
       });
 
       resetToDefaultSheetBtn.addEventListener('click', () => {
-        sheetUrlInput.value = DEFAULT_SPREADSHEET_ID;
-        triggerToast('รีเซ็ตลิงก์ค่าเริ่มต้นแล้ว กดบันทึกเพื่อดึงข้อมูล', 'success');
+        sheetUrl1Input.value = DEFAULT_SPREADSHEET_ID_1;
+        sheetUrl2Input.value = DEFAULT_SPREADSHEET_ID_2;
+        triggerToast('กู้คืนโครงสร้างลิงก์เริ่มต้นแล้ว กรุณากดปุ่มบันทึกเพื่อซิงค์ดึงข้อมูล', 'success');
       });
     }
 
-    function initSimulatorActions() {
-      const submitBtn = document.getElementById('submitSimBtn');
-      const amountInput = document.getElementById('simAmount');
-      const accountSelect = document.getElementById('simAccountSelect');
-      const simLog = document.getElementById('simLog');
-      const resetSimBtn = document.getElementById('resetSim');
-
-      submitBtn.addEventListener('click', () => {
-        const code = accountSelect.value;
-        const amount = parseFloat(amountInput.value);
-
-        if (isNaN(amount) || amount <= 0) {
-          triggerToast('กรุณากรอกจำนวนเงินเบิกจ่ายที่มากกว่าศูนย์', 'warning');
-          return;
-        }
-
-        const account = peaAccounts.find(acc => acc.code === code);
-        if (!account) return;
-
-        const maxAvailable = account.budget - account.spent;
-        if (account.budget > 0 && amount > maxAvailable) {
-          triggerToast(`ยอดเงินจำลองเกินกว่างบประมาณคงเหลือจริง (${formatCurrency(maxAvailable)})`, 'warning');
-        }
-
-        account.spent = parseFloat((account.spent + amount).toFixed(2));
-
-        simLog.classList.remove('hidden');
-        simLog.innerHTML = `
-          <div class="flex items-center space-x-2">
-            <span class="animate-ping h-2 w-2 rounded-full bg-pea-500"></span>
-            <span><strong>[ระบบจำลอง]</strong> จ่ายรหัสบัญชี <strong>${account.code}</strong> เพิ่มเติม: <strong>+${formatCurrency(amount)}</strong> (จ่ายสะสมแล้ว ${formatCurrency(account.spent)})</span>
-          </div>
-        `;
-
-        refreshDashboard();
-        triggerToast('บันทึกยอดจำลองและคำนวณกราฟเสร็จสิ้น', 'success');
-        amountInput.value = '';
-      });
-
-      resetSimBtn.addEventListener('click', () => {
-        peaAccounts = JSON.parse(JSON.stringify(initialLiveAccounts));
-        simLog.classList.add('hidden');
-        amountInput.value = '';
-        refreshDashboard();
-        triggerToast('รีเซ็ตผลจำลองกลับสู่สเปรดชีตหลักแล้ว', 'success');
-      });
+    // Set up interactive comparison tool actions
+    function initComparisonActions() {
+      const select = document.getElementById('compareAccountSelect');
+      if (select) {
+        select.addEventListener('change', updateComparisonDetails);
+      }
     }
 
     function initExcelExport() {
       const exportBtn = document.getElementById('exportExcelBtn');
       exportBtn.addEventListener('click', () => {
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-        csvContent += "รหัสบัญชี,ชื่อบัญชีทำการ,หมวดหมู่,งบประมาณปี 2569 (บาท),ใช้จริงสะสม (บาท),คงเหลือ (บาท),เปอร์เซ็นต์คงเหลือ (%)\n";
+        csvContent += "รหัสบัญชี,ชื่อรหัสบัญชีทำการ,หมวดหมู่,งบประมาณปี 2569 (บาท),ใช้จริงสะสม (บาท),คงเหลือ (บาท),เปอร์เซ็นต์คงเหลือ (%)\n";
 
         peaAccounts.forEach(acc => {
           const remain = acc.budget - acc.spent;
@@ -1094,12 +1371,13 @@
 
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
+        const modeLabel = (currentView === 'combined') ? 'รวมศูนย์_ผจฟ1_ผจฟ2' : (currentView === 'fajof1' ? 'ผจฟ1' : 'ผจฟ2');
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `รายงานวิเคราะห์คุมงบทำการ_ผจฟ2_${new Date().toISOString().slice(0,10)}.csv`);
+        link.setAttribute("download", `รายงานวิเคราะห์งบทำการ_${modeLabel}_${new Date().toISOString().slice(0,10)}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        triggerToast('ดาวน์โหลดเอกสารรายงานคุมงบ (CSV) เรียบร้อย', 'success');
+        triggerToast('ดาวน์โหลดเอกสารรายงานคุมงบสำหรับนำไปเปิดบน Excel เรียบร้อย', 'success');
       });
     }
 
@@ -1109,11 +1387,14 @@
     }
 
     window.onload = function() {
+      initViewSwitcher();
       initConfigActions();
-      initSimulatorActions();
+      initComparisonActions();
       initExcelExport();
       initFilterActions();
-      fetchGoogleSheetLive(currentSpreadsheetId);
+      
+      // Initial Sync
+      syncOnlineData();
     }
   </script>
 </body>
